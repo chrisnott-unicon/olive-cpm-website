@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     
     <!-- SEO & OPEN GRAPH META TAGS -->
-    <title>Olive CPM | Construction Project Management Software</title>
-    <meta name="description" content="Construction management without the black box. Olive CPM brings absolute transparency, remote oversight, and contractual protection to African infrastructure projects.">
+    <title>Olive CPM | AI-Integrated Construction Management</title>
+    <meta name="description" content="Construction management driven by the contract. Olive CPM brings AI-powered transparency, automated procurement, and strict contractual defense to African infrastructure.">
     <meta property="og:title" content="Olive CPM | Intelligent Construction Management">
-    <meta property="og:description" content="Join the closed beta for Olive CPM. Built by Unicon Construction.">
+    <meta property="og:description" content="Join the closed beta. Enterprise multi-tenant project management built by contractors, for contractors.">
     <meta property="og:type" content="website">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,10 +32,8 @@
         .bg-blueprint { background-image: linear-gradient(to right, rgba(229, 231, 235, 0.6) 1px, transparent 1px), linear-gradient(to bottom, rgba(229, 231, 235, 0.6) 1px, transparent 1px); background-size: 4rem 4rem; }
         .bg-blueprint-dark { background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 4rem 4rem; }
         .text-outline { color: transparent; -webkit-text-stroke: 1px #0a0a0a; }
-        .text-outline-white { color: transparent; -webkit-text-stroke: 1px #ffffff; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-up { animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
-        .app-shadow { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0,0,0,0.05); }
         
         /* Form Verification Slider */
         .verify-slider { -webkit-appearance: none; width: 100%; height: 44px; background: #f4f4f5; outline: none; border: 1px solid #e5e7eb; cursor: pointer; border-radius: 2px; }
@@ -61,8 +59,8 @@
 
             <div class="hidden lg:flex items-center gap-8">
                 <a href="#platform" class="text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-unicon-green transition-colors">The Platform</a>
-                <a href="#features" class="text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-unicon-green transition-colors">Core Modules</a>
-                <a href="#beta" class="text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-unicon-green transition-colors">Beta Trial</a>
+                <a href="#modules" class="text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-unicon-green transition-colors">Core Modules</a>
+                <a href="#enterprise" class="text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-unicon-green transition-colors">Enterprise Specs</a>
             </div>
 
             <a href="#apply" class="px-5 py-2.5 bg-unicon-black text-white text-[10px] font-bold uppercase tracking-widest hover:bg-unicon-green transition-colors rounded-sm shadow-sm hidden sm:inline-block">
@@ -76,13 +74,13 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-xl flex-col">
             <a href="#platform" class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-600 border-b border-gray-100">The Platform</a>
-            <a href="#features" class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-600 border-b border-gray-100">Core Modules</a>
-            <a href="#beta" class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-600 border-b border-gray-100">Beta Trial</a>
+            <a href="#modules" class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-600 border-b border-gray-100">Core Modules</a>
+            <a href="#enterprise" class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-600 border-b border-gray-100">Enterprise Specs</a>
             <a href="#apply" class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-unicon-green bg-gray-50">Apply For Access</a>
         </div>
     </nav>
 
-    <!-- HERO SECTION (IMAGE RICH) -->
+    <!-- HERO SECTION -->
     <header class="relative min-h-[90vh] flex flex-col justify-center border-b border-unicon-border bg-blueprint pt-24 pb-16 overflow-hidden">
         <!-- Photographic Background Overlay -->
         <div class="absolute inset-0 z-0">
@@ -96,7 +94,7 @@
             <div class="mb-6 flex flex-wrap items-center gap-3 animate-fade-up">
                 <span class="inline-flex items-center gap-2 py-1.5 px-4 border border-unicon-black text-[10px] md:text-xs font-bold uppercase tracking-widest text-unicon-black bg-white shadow-sm">
                     <span class="w-2 h-2 bg-unicon-green rounded-full animate-pulse"></span>
-                    Project Management Software
+                    Contract-Driven Intelligence
                 </span>
                 <span class="inline-flex items-center gap-2 py-1.5 px-4 border border-unicon-green text-[10px] md:text-xs font-bold uppercase tracking-widest text-unicon-green bg-unicon-green/10 shadow-sm">
                     Closed Beta Active
@@ -111,13 +109,13 @@
             <div class="max-w-4xl border-t border-unicon-border pt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-up" style="animation-delay: 200ms;">
                 <div class="lg:col-span-8">
                     <p class="text-xl sm:text-2xl font-light leading-relaxed text-unicon-dark mb-8">
-                        Construction management without the black box. Olive CPM is a proprietary digital platform engineered to bring <span class="text-unicon-green font-bold">total transparency, remote site control, and strict contractual defense</span> to infrastructure projects.
+                        Construction management without the black box. Olive CPM is a proprietary digital platform engineered to bring <span class="text-unicon-green font-bold">AI-integrated automation, remote site oversight, and strict contractual defense</span> to complex infrastructure projects.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="#apply" class="px-8 py-4 bg-unicon-black text-white font-bold uppercase tracking-widest text-xs hover:bg-unicon-green transition-colors rounded-sm text-center shadow-lg">
                             Request Beta Invitation
                         </a>
-                        <a href="#platform" class="px-8 py-4 bg-white text-unicon-black border border-unicon-border font-bold uppercase tracking-widest text-xs hover:bg-gray-50 transition-colors rounded-sm text-center">
+                        <a href="#modules" class="px-8 py-4 bg-white text-unicon-black border border-unicon-border font-bold uppercase tracking-widest text-xs hover:bg-gray-50 transition-colors rounded-sm text-center">
                             Explore Platform
                         </a>
                     </div>
@@ -125,7 +123,7 @@
                 <div class="lg:col-span-4 flex flex-col justify-center border-l-0 lg:border-l border-unicon-border pl-0 lg:pl-8 mt-6 lg:mt-0">
                     <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1 font-bold">Contract Frameworks</p>
                     <p class="text-lg font-bold text-unicon-black uppercase tracking-tight">JBCC, GCC, FIDIC</p>
-                    <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1 mt-4 font-bold">Built By</p>
+                    <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1 mt-4 font-bold">Engineered By</p>
                     <p class="text-sm font-bold text-unicon-black uppercase tracking-tight">Unicon Construction SA</p>
                 </div>
             </div>
@@ -133,40 +131,35 @@
     </header>
 
     <!-- THE PROBLEM / AFRICAN CONTEXT -->
-    <section id="platform" class="py-20 md:py-32 bg-unicon-black border-b border-gray-800 relative overflow-hidden">
-        <!-- Mass Earthworks Imagery Background -->
-        <div class="absolute inset-0 z-0">
-            <img src="https://raw.githubusercontent.com/chrisnott-unicon/Unicon-earthworks/main/unicon-construction-aerial-excavation-earthmoving-site-IMG_5067.JPG" class="w-full h-full object-cover opacity-[0.15] grayscale" alt="Remote African Earthworks">
-            <div class="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent"></div>
-        </div>
-
+    <section id="platform" class="py-20 md:py-32 bg-unicon-black border-b border-gray-800 bg-blueprint-dark relative">
         <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+            
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-                <div class="lg:col-span-6 text-white">
+                <div class="lg:col-span-5 text-white">
                     <p class="text-unicon-green font-bold uppercase tracking-widest text-[10px] md:text-xs mb-3 flex items-center">
                         <i class="fa-solid fa-earth-africa mr-2"></i> The Development Context
                     </p>
-                    <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight uppercase leading-none mb-6">
+                    <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight uppercase leading-none mb-6">
                         Remote Sites. <br> <span class="text-unicon-green">Total Control.</span>
                     </h2>
                     <p class="text-gray-400 font-light leading-relaxed mb-6 text-base md:text-lg">
-                        Executing major infrastructure across Southern Africa comes with inherent risks. Geographical isolation, fragmented supply chains, extreme weather events, and delayed site reporting plague traditional contracting.
+                        Generic software fails on the African construction site because it relies on manual data entry. Olive CPM flips the paradigm: the application is driven entirely by your initial contract inputs and geographic coordinates.
                     </p>
                     <p class="text-gray-400 font-light leading-relaxed text-base md:text-lg">
                         For developers and Principal Agents managing capital from major hubs, overseeing a project in a deep-rural or cross-border node often feels like looking into a black box. <strong class="text-white">Olive CPM was built to shatter that black box.</strong>
                     </p>
                 </div>
 
-                <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="bg-[#111111]/80 backdrop-blur-md p-8 border border-gray-800 hover:border-unicon-green transition-colors">
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="bg-[#111111] p-8 border border-gray-800 hover:border-unicon-green transition-colors">
+                        <i class="fa-solid fa-satellite-dish text-3xl text-unicon-green mb-5"></i>
+                        <h4 class="font-bold uppercase tracking-tight text-lg mb-2 text-white">Automated Telemetry</h4>
+                        <p class="text-sm text-gray-500 font-light leading-relaxed">Lock in your site's GPS coordinates once. Olive automatically pulls localized atmospheric and weather data directly into your statutory daily diaries.</p>
+                    </div>
+                    <div class="bg-[#111111] p-8 border border-gray-800 hover:border-unicon-green transition-colors">
                         <i class="fa-solid fa-shield-halved text-3xl text-unicon-green mb-5"></i>
                         <h4 class="font-bold uppercase tracking-tight text-lg mb-2 text-white">Contractual Defence</h4>
-                        <p class="text-sm text-gray-500 font-light leading-relaxed">By enforcing rigid, timestamped daily site records, Olive actively builds a defensive wall of data against unfair penalties and secures valid Extensions of Time (EOT).</p>
-                    </div>
-                    <div class="bg-[#111111]/80 backdrop-blur-md p-8 border border-gray-800 hover:border-unicon-green transition-colors">
-                        <i class="fa-solid fa-satellite-dish text-3xl text-unicon-green mb-5"></i>
-                        <h4 class="font-bold uppercase tracking-tight text-lg mb-2 text-white">Live Site Operations</h4>
-                        <p class="text-sm text-gray-500 font-light leading-relaxed">No more waiting for month-end PDF reports. Stakeholders gain immediate, cloud-based access to site weather data, active labour counts, material deliveries, and progress tracking.</p>
+                        <p class="text-sm text-gray-500 font-light leading-relaxed">By enforcing rigid, AI-audited daily site records, Olive actively builds a defensive wall of data against unfair penalties and secures valid Extensions of Time (EOT).</p>
                     </div>
                 </div>
             </div>
@@ -175,103 +168,137 @@
     </section>
 
     <!-- CORE MODULES -->
-    <section id="features" class="py-20 md:py-32 bg-white border-b border-unicon-border relative overflow-hidden bg-blueprint">
+    <section id="modules" class="py-20 md:py-32 bg-white border-b border-unicon-border relative overflow-hidden bg-blueprint">
         <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
             
             <div class="text-center mb-20 md:mb-24">
                 <p class="text-unicon-green font-bold uppercase tracking-widest text-[10px] md:text-xs mb-3">Platform Architecture</p>
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold uppercase tracking-tight text-unicon-black mb-4">Core Modules</h2>
-                <p class="text-gray-500 font-light text-lg max-w-3xl mx-auto">Designed for the reality of the African construction site. Olive features a clean, intuitive interface that requires near-zero learning curve for site agents and foremen.</p>
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold uppercase tracking-tight text-unicon-black mb-4">Intelligent Modules</h2>
+                <p class="text-gray-500 font-light text-lg max-w-3xl mx-auto">Designed for the reality of the site office. Clean, intuitive interfaces powered by complex AI routing behind the scenes.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
-                <!-- Feature 1 -->
-                <div class="bg-unicon-slate border border-unicon-border p-8 md:p-10 shadow-sm flex flex-col">
-                    <div class="w-14 h-14 bg-white flex items-center justify-center text-unicon-green rounded-full border border-unicon-border mb-6 shadow-sm">
-                        <i class="fa-solid fa-clipboard-list text-xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">Statutory Site Records</h3>
-                    <p class="text-gray-600 font-light leading-relaxed mb-6 flex-grow">
-                        The heartbeat of the platform. Olive digitizes the traditional site diary, forcing rigorous daily compliance. It captures critical data points required to back up JBCC and GCC claims with irrefutable evidence.
-                    </p>
-                    <ul class="space-y-3 text-sm text-gray-600 font-light border-t border-gray-200 pt-5">
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-unicon-green mt-1 text-xs"></i> <span><strong class="text-unicon-black">Daily Operations:</strong> Log progress and instructions.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-unicon-green mt-1 text-xs"></i> <span><strong class="text-unicon-black">Automated Weather:</strong> Live GPS atmospheric records.</span></li>
-                    </ul>
-                </div>
-
-                <!-- Feature 2 -->
-                <div class="bg-unicon-slate border border-unicon-border p-8 md:p-10 shadow-sm flex flex-col">
-                    <div class="w-14 h-14 bg-white flex items-center justify-center text-unicon-green rounded-full border border-unicon-border mb-6 shadow-sm">
-                        <i class="fa-solid fa-calendar-check text-xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">Programme Integrity</h3>
-                    <p class="text-gray-600 font-light leading-relaxed mb-6 flex-grow">
-                        Keep your critical path visible. Olive acts as a strategic scheduling hub, ensuring the Baseline Programme is constantly updated against daily site realities to forecast delays before they trigger penalties.
-                    </p>
-                    <ul class="space-y-3 text-sm text-gray-600 font-light border-t border-gray-200 pt-5">
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-unicon-green mt-1 text-xs"></i> <span><strong class="text-unicon-black">Milestone Tracking:</strong> Granular activity monitoring.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-unicon-green mt-1 text-xs"></i> <span><strong class="text-unicon-black">Slippage Prediction:</strong> Identify bottleneck risks early.</span></li>
-                    </ul>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="bg-unicon-slate border border-unicon-border p-8 md:p-10 shadow-sm flex flex-col">
-                    <div class="w-14 h-14 bg-white flex items-center justify-center text-unicon-green rounded-full border border-unicon-border mb-6 shadow-sm">
-                        <i class="fa-solid fa-folder-tree text-xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">Integrated Documentation</h3>
-                    <p class="text-gray-600 font-light leading-relaxed mb-6 flex-grow">
-                        Never build off an outdated revision again. Olive creates a single, controlled document register, seamlessly linking with cloud storage nodes to synchronize the entire professional team.
-                    </p>
-                    <ul class="space-y-3 text-sm text-gray-600 font-light border-t border-gray-200 pt-5">
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-unicon-green mt-1 text-xs"></i> <span><strong class="text-unicon-black">Cloud Sync:</strong> Integrates with Drive, Dropbox, OneDrive.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-unicon-green mt-1 text-xs"></i> <span><strong class="text-unicon-black">Controlled Registers:</strong> Centralized Drawings & RFIs.</span></li>
-                    </ul>
-                </div>
-
-                <!-- Feature 4 -->
-                <div class="bg-unicon-slate border border-unicon-border p-8 md:p-10 shadow-sm flex flex-col">
-                    <div class="w-14 h-14 bg-white flex items-center justify-center text-unicon-green rounded-full border border-unicon-border mb-6 shadow-sm">
+                <!-- Module 1 -->
+                <div class="bg-unicon-slate border border-unicon-border p-8 shadow-sm flex flex-col hover:border-unicon-green transition-colors group">
+                    <div class="w-12 h-12 bg-white flex items-center justify-center text-unicon-green rounded-sm border border-unicon-border mb-6 group-hover:bg-unicon-green group-hover:text-white transition-colors">
                         <i class="fa-solid fa-file-contract text-xl"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">Executive Contract Dashboard</h3>
-                    <p class="text-gray-600 font-light leading-relaxed mb-6 flex-grow">
-                        A broad, immediate view of the project's macro details. Aligning the entire stakeholder group on commercial contract formats, timelines, and the professional roster at a glance.
+                    <h3 class="text-xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">Contract-Driven Setup</h3>
+                    <p class="text-gray-600 font-light leading-relaxed text-sm flex-grow">
+                        Everything begins with the agreement. Upload your GCC, JBCC, or FIDIC contract to automatically initialize project milestones, set compliance baselines, and trigger automated contractual notifications.
                     </p>
-                    <ul class="space-y-3 text-sm text-gray-600 font-light border-t border-gray-200 pt-5">
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-unicon-green mt-1 text-xs"></i> <span><strong class="text-unicon-black">Central Roster:</strong> Rapid access to Principal Agent details.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-unicon-green mt-1 text-xs"></i> <span><strong class="text-unicon-black">Time Logistics:</strong> Live tracking of contractual completion dates.</span></li>
-                    </ul>
+                </div>
+
+                <!-- Module 2 -->
+                <div class="bg-unicon-slate border border-unicon-border p-8 shadow-sm flex flex-col hover:border-unicon-green transition-colors group">
+                    <div class="w-12 h-12 bg-white flex items-center justify-center text-unicon-green rounded-sm border border-unicon-border mb-6 group-hover:bg-unicon-green group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-clipboard-list text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">Statutory Site Records</h3>
+                    <p class="text-gray-600 font-light leading-relaxed text-sm flex-grow">
+                        The heartbeat of the platform. Olive digitizes the site diary, capturing critical data points (labor tracking, geo-fenced weather, QR-coded material deliveries) required to back up claims with irrefutable evidence.
+                    </p>
+                </div>
+
+                <!-- Module 3 -->
+                <div class="bg-unicon-slate border border-unicon-border p-8 shadow-sm flex flex-col hover:border-unicon-green transition-colors group">
+                    <div class="w-12 h-12 bg-white flex items-center justify-center text-unicon-green rounded-sm border border-unicon-border mb-6 group-hover:bg-unicon-green group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-network-wired text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">AI-Powered Procurement</h3>
+                    <p class="text-gray-600 font-light leading-relaxed text-sm flex-grow">
+                        Bridging the BOQ with the supply chain. AI parses your Bill of Quantities and cross-references your project's GPS location to generate and route RFQs to localized supplier directories automatically.
+                    </p>
+                </div>
+
+                <!-- Module 4 -->
+                <div class="bg-unicon-slate border border-unicon-border p-8 shadow-sm flex flex-col hover:border-unicon-green transition-colors group">
+                    <div class="w-12 h-12 bg-white flex items-center justify-center text-unicon-green rounded-sm border border-unicon-border mb-6 group-hover:bg-unicon-green group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-money-check-dollar text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">Finance & Certification</h3>
+                    <p class="text-gray-600 font-light leading-relaxed text-sm flex-grow">
+                        Generate accurate interim valuations and professional payment certificates. Olive maps site progress directly against your imported BOQ, ensuring payment timeframes are strictly adhered to.
+                    </p>
+                </div>
+
+                <!-- Module 5 -->
+                <div class="bg-unicon-slate border border-unicon-border p-8 shadow-sm flex flex-col hover:border-unicon-green transition-colors group">
+                    <div class="w-12 h-12 bg-white flex items-center justify-center text-unicon-green rounded-sm border border-unicon-border mb-6 group-hover:bg-unicon-green group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-calendar-check text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">Programme Integrity</h3>
+                    <p class="text-gray-600 font-light leading-relaxed text-sm flex-grow">
+                        Keep your critical path visible. Our planning module leverages AI to analyze daily progress against the baseline, accurately forecasting delays and bottlenecks before they trigger penalties.
+                    </p>
+                </div>
+
+                <!-- Module 6 -->
+                <div class="bg-unicon-slate border border-unicon-border p-8 shadow-sm flex flex-col hover:border-unicon-green transition-colors group">
+                    <div class="w-12 h-12 bg-white flex items-center justify-center text-unicon-green rounded-sm border border-unicon-border mb-6 group-hover:bg-unicon-green group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-shield-halved text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold uppercase tracking-tight text-unicon-black mb-3">Compliance & Audit</h3>
+                    <p class="text-gray-600 font-light leading-relaxed text-sm flex-grow">
+                        Automated structural health and regulatory oversight. The AI Assistant constantly audits site records against National Building Regulations and the OHS Act, flagging vulnerabilities instantly.
+                    </p>
                 </div>
 
             </div>
         </div>
     </section>
 
-    <!-- BETA APPLICATION PROGRAM -->
-    <section id="beta" class="py-24 bg-unicon-green text-white relative overflow-hidden">
-        <!-- Deep Imagery Background -->
-        <div class="absolute inset-0 z-0">
-            <img src="https://raw.githubusercontent.com/chrisnott-unicon/bestphotos/main/construction-site-crane-building-scaffolding-Pietermaritzburg-Invesco%20Centre.JPG" class="w-full h-full object-cover opacity-20 mix-blend-multiply grayscale" alt="Construction Site Operations">
-        </div>
+    <!-- ENTERPRISE SPECS -->
+    <section id="enterprise" class="py-20 md:py-32 bg-unicon-black text-white relative border-b border-gray-800">
+        <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                
+                <div>
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight uppercase leading-none mb-6">
+                        Enterprise <br> <span class="text-unicon-green">Architecture.</span>
+                    </h2>
+                    <p class="text-gray-400 font-light leading-relaxed mb-10 text-base md:text-lg">
+                        Olive CPM is designed to function as an extension of your own brand. Operating as a multi-tenanted ecosystem, the platform grants your firm absolute administrative control over data, users, and security.
+                    </p>
 
-        <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-            <div>
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight uppercase leading-none mb-6 text-white">
-                    Built by <br>Contractors. <br><span class="text-unicon-black text-outline-white">For Contractors.</span>
-                </h2>
-                <p class="font-light leading-relaxed text-lg mb-8 text-white/90">
-                    Olive CPM was developed internally by Unicon Construction after decades of frustration with generic, over-complicated international software that failed to understand the nuances of the African civil environment.
-                </p>
-                <div class="border-l-4 border-unicon-black pl-6 py-2">
-                    <p class="text-xl font-bold uppercase tracking-tight mb-2 text-unicon-black">The Closed Beta</p>
-                    <p class="font-light text-sm text-white/90">Currently deployed successfully across our active sites, we are opening an exclusive beta phase for select external Principal Agents, Property Developers, and regional Tier 1 Contractors.</p>
+                    <ul class="space-y-6">
+                        <li class="flex items-start gap-4">
+                            <i class="fa-solid fa-building-user text-unicon-green mt-1 text-xl"></i>
+                            <div>
+                                <h4 class="font-bold uppercase tracking-tight text-sm mb-1 text-white">White-Label Output</h4>
+                                <p class="text-xs text-gray-500 font-light leading-relaxed">Upload your corporate logo and credentials. Every generated RFI, site instruction, and payment certificate carries your branding, not ours.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <i class="fa-solid fa-lock text-unicon-green mt-1 text-xl"></i>
+                            <div>
+                                <h4 class="font-bold uppercase tracking-tight text-sm mb-1 text-white">Role-Based Access Control (RBAC)</h4>
+                                <p class="text-xs text-gray-500 font-light leading-relaxed">You control the roster. Assign specific permissions to site agents, principal engineers, and client representatives on a per-project basis.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <i class="fa-solid fa-cloud text-unicon-green mt-1 text-xl"></i>
+                            <div>
+                                <h4 class="font-bold uppercase tracking-tight text-sm mb-1 text-white">Secure Native & Dual Storage</h4>
+                                <p class="text-xs text-gray-500 font-light leading-relaxed">Secured via Firebase and native Google Workspace authentication. Keep data natively in Olive, or seamlessly mirror your project repositories to your own external cloud drives for absolute data sovereignty.</p>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
-            </div>
-            <div class="flex justify-center lg:justify-end opacity-20 hidden sm:flex">
-                <i class="fa-solid fa-laptop-code text-[150px] md:text-[250px] text-unicon-black transform -rotate-6"></i>
+
+                <div class="relative h-full w-full min-h-[400px] flex items-center justify-center border border-gray-800 bg-[#050505] p-8">
+                     <!-- Abstract Tech Representation -->
+                     <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#475c4d 1px, transparent 1px); background-size: 20px 20px;"></div>
+                     <div class="text-center relative z-10">
+                        <div class="w-20 h-20 mx-auto border-2 border-unicon-green rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(71,92,77,0.3)]">
+                            <i class="fa-brands fa-google text-3xl text-white"></i>
+                        </div>
+                        <p class="text-sm font-bold uppercase tracking-widest text-white mb-2">Native SSO Integration</p>
+                        <p class="text-[10px] font-mono text-unicon-green uppercase tracking-widest">Enterprise Secured</p>
+                     </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -281,6 +308,9 @@
         <div class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
             
             <div class="text-center mb-12 border-b border-unicon-border pb-8">
+                <span class="inline-block py-1 px-3 border border-unicon-green text-[10px] font-bold uppercase tracking-widest text-unicon-green mb-4 bg-unicon-green/10">
+                    <i class="fa-solid fa-lock mr-2"></i> Closed Beta Program
+                </span>
                 <h2 class="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-unicon-black mb-4">Request Beta Invitation</h2>
                 <p class="text-gray-500 font-light text-sm sm:text-base">Approval requires verification of an active CIDB grading, professional registration, or active development portfolio.</p>
             </div>
@@ -352,7 +382,7 @@
                     <p class="text-base text-gray-600 font-light leading-relaxed max-w-sm mb-8">
                         Thank you for your interest in Olive CPM. Our administrative team will review your application and contact you regarding Beta access provisioning.
                     </p>
-                    <button onclick="location.reload()" class="text-[10px] font-bold uppercase tracking-widest text-unicon-green hover:text-unicon-black transition-colors border-b border-unicon-green pb-1">
+                    <button onclick="location.reload()" class="text-xs font-bold uppercase tracking-widest text-unicon-green hover:text-unicon-black transition-colors border-b border-unicon-green pb-1">
                         Submit Another Inquiry
                     </button>
                 </div>
