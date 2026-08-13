@@ -1,0 +1,369 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection Test Document
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isEmailVerified() { return request.auth.token.email_verified == true; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // Auth role lookups
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function getUserOrgId() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        ? getUserData().get('orgId', null) 
+        : null;
+    }
+    function isSuperAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email in ['chris.nott@uniconsa.co.za', 'chris.nott@unicons.co.za']) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().get('role', '') == 'Super_Admin')
+      );
+    }
+    function isOrgAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().get('role', '') == 'Org_Admin';
+    }
+    function isAdmin() { 
+      return isSuperAdmin() || isOrgAdmin();
+    }
+    function canAccessProject(projectId) {
+      return isSuperAdmin() || (
+        isSignedIn() && 
+        exists(/databases/$(database)/documents/projects/$(projectId)) && (
+          (get(/databases/$(database)/documents/projects/$(projectId)).data.get('orgId', '') == getUserOrgId() && isOrgSubscribed()) ||
+          exists(/databases/$(database)/documents/projects/$(projectId)/stakeholders/$(request.auth.uid))
+        )
+      );
+    }
+    function canAccessTool(toolName) {
+      return isAdmin() || (
+        isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        getUserData().get('allowedTools', []).hasAny([toolName])
+      );
+    }
+
+    function isOrgSubscribed() {
+      return getUserOrgId() != null && 
+             exists(/databases/$(database)/documents/organizations/$(getUserOrgId())) &&
+             get(/databases/$(database)/documents/organizations/$(getUserOrgId())).data.get('subscriptionStatus', '') == 'active';
+    }
+
+    // --- Validation Helpers ---
+    function isValidUser(data) {
+      return data.email is string && data.email.size() <= 200
+          && data.role in ['Super_Admin', 'User', 'Org_Admin']
+          && (data.orgId is string || !data.keys().hasAny(['orgId']))
+          && data.keys().hasAll(['email', 'role']);
+    }
+
+    function isValidProject(data) {
+      return data.name is string && data.name.size() <= 100
+          && data.contractType in ['JBCC', 'GCC', 'NEC', 'FIDIC']
+          && data.status in ['Pre-Design', 'Design', 'Pre-construction', 'Construction', 'Post-construction']
+          && (data.retentionRate is number || !data.keys().hasAny(['retentionRate']))
+          && (data.policies is map || !data.keys().hasAny(['policies']))
+          && (data.orgId is string || !data.keys().hasAny(['orgId']))
+          && data.keys().hasAll(['name', 'contractType', 'status']);
+    }
+
+    function isValidSiteEvent(data) {
+      return data.userId == request.auth.uid
+          && data.note is string && data.note.size() <= 10000
+          && data.status in ['Draft', 'Pending_Approval', 'Published']
+          && (data.media is list || !data.keys().hasAny(['media']))
+          && (data.location is map || !data.keys().hasAny(['location']))
+          && (data.weather is map || !data.keys().hasAny(['weather']))
+          && data.keys().hasAll(['userId', 'note', 'createdAt', 'status']);
+    }
+
+    function isValidStakeholder(data) {
+      return data.name is string && data.name.size() <= 200
+          && data.role is string
+          && data.email is string
+          && data.status in ['Pending_Verification', 'Awaiting_Response', 'Invited', 'Active']
+          && data.keys().hasAll(['name', 'role', 'email', 'status']);
+    }
+
+    function isValidPhoto(data) {
+      return data.url is string 
+          && data.tags is list
+          && data.uploadedBy is string
+          && data.keys().hasAll(['url', 'tags', 'uploadedBy', 'createdAt']);
+    }
+
+    function isValidTask(data) {
+      return data.title is string && data.title.size() <= 200
+          && data.status in ['Pending', 'In Progress', 'Completed']
+          && data.priority in ['Low', 'Medium', 'High', 'Critical']
+          && (data.description is string || !data.keys().hasAny(['description']))
+          && (data.dueDate is string || !data.keys().hasAny(['dueDate']))
+          && (data.isMilestone is bool || !data.keys().hasAny(['isMilestone']))
+          && data.keys().hasAll(['title', 'status', 'priority', 'createdBy', 'createdAt']);
+    }
+
+    function isValidDocument(data) {
+      return data.name is string && data.name.size() <= 255
+          && (data.data is string || !data.keys().hasAny(['data']))
+          && data.mimeType is string
+          && data.category in ['Drawing', 'Specification', 'Agreement', 'Contract', 'Minute', 'Other']
+          && data.keys().hasAll(['name', 'mimeType', 'category', 'uploadedBy', 'createdAt']);
+    }
+
+    function isValidResource(data) {
+      return data.type in ['Human', 'Material', 'PlantEquipment']
+          && data.name is string && data.name.size() <= 200
+          && data.keys().hasAll(['type', 'name', 'createdAt']);
+    }
+
+    function isValidComplianceItem(data) {
+      return data.title is string && data.title.size() <= 200
+          && data.category in ['Health_Safety', 'Environmental', 'Labor', 'Quality', 'General']
+          && data.status in ['Pending', 'Met', 'Not_Applicable', 'Expired']
+          && data.keys().hasAll(['title', 'category', 'status', 'createdAt']);
+    }
+
+    function isValidRfi(data) {
+      return data.title is string && data.title.size() <= 500
+          && data.status in ['Draft', 'Internal_Review', 'Published_Open', 'Response_Received', 'Pending_Closure', 'Closed']
+          && data.query is string && data.query.size() <= 10000
+          && (data.rfiNumber is string || !data.keys().hasAny(['rfiNumber']))
+          && (data.drawingRef is map || !data.keys().hasAny(['drawingRef']))
+          && (data.responseType in ['Clarification', 'SiteInstruction'] || !data.keys().hasAny(['responseType']))
+          && (data.siteInstructionId is string || !data.keys().hasAny(['siteInstructionId']))
+          && data.creatorId is string
+          && data.keys().hasAll(['title', 'status', 'query', 'creatorId', 'createdAt', 'updatedAt']);
+    }
+
+    function isValidSiteInstruction(data) {
+      return data.siNumber is string
+          && data.title is string && data.title.size() <= 500
+          && data.description is string && data.description.size() <= 20000
+          && (data.rfiId is string || !data.keys().hasAny(['rfiId']))
+          && data.issuedById is string
+          && data.issuedByName is string
+          && data.issuedToId is string
+          && data.status in ['Draft', 'Issued', 'Acknowledged', 'Completed', 'Cancelled']
+          && data.keys().hasAll(['siNumber', 'title', 'description', 'issuedById', 'issuedByName', 'issuedToId', 'status', 'createdAt', 'updatedAt']);
+    }
+
+    function isValidOrganization(data) {
+      return data.name is string && data.name.size() <= 200
+          && (data.registrationNumber is string || !data.keys().hasAny(['registrationNumber']))
+          && (data.vatNumber is string || !data.keys().hasAny(['vatNumber']))
+          && (data.physicalAddress is string || !data.keys().hasAny(['physicalAddress']))
+          && (data.postalAddress is string || !data.keys().hasAny(['postalAddress']))
+          && (data.contactPhone is string || !data.keys().hasAny(['contactPhone']))
+          && (data.contactEmail is string || !data.keys().hasAny(['contactEmail']))
+          && (data.professionalBody is string || !data.keys().hasAny(['professionalBody']))
+          && (data.professionalRegNumber is string || !data.keys().hasAny(['professionalRegNumber']))
+          && (data.practiceNumber is string || !data.keys().hasAny(['practiceNumber']))
+          && (data.subscriptionStatus is string || !data.keys().hasAny(['subscriptionStatus']))
+          && data.keys().hasAll(['name', 'createdAt']);
+    }
+
+    function isValidNotification(data) {
+      return data.title is string && data.title.size() <= 200
+          && data.message is string && data.message.size() <= 500
+          && data.type in ['Info', 'Urgent', 'Invite', 'System']
+          && data.read is bool
+          && (data.actionUrl is string || !data.keys().hasAny(['actionUrl']))
+          && (data.projectId is string || !data.keys().hasAny(['projectId']))
+          && data.keys().hasAll(['title', 'message', 'type', 'read', 'createdAt']);
+    }
+
+    // --- Rules ---
+
+    // Organizations
+    match /organizations/{orgId} {
+      allow get: if isSuperAdmin() || getUserOrgId() == orgId;
+      allow list: if isSuperAdmin() || getUserOrgId() == orgId;
+      allow create: if isSignedIn() && isValidOrganization(incoming());
+      allow update: if isSuperAdmin() || (isOrgAdmin() && getUserOrgId() == orgId);
+    }
+
+    // User Preferences
+    match /user_preferences/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Users
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSuperAdmin() || (isSignedIn() && existing().orgId == getUserOrgId());
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming()) && (isSuperAdmin() || incoming().role == 'User' || incoming().role == 'Org_Admin');
+      allow update: if isSuperAdmin() || request.auth.uid == userId || (isOrgAdmin() && existing().orgId == getUserOrgId());
+      
+      // Notifications
+      match /notifications/{notificationId} {
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        allow create: if isSignedIn() && request.auth.uid == userId && isValidNotification(incoming());
+        allow update: if isSignedIn() && request.auth.uid == userId && isValidNotification(incoming());
+        allow delete: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    // Projects
+    match /projects/{projectId} {
+      allow get: if isSuperAdmin() || (isSignedIn() && existing().orgId == getUserOrgId() && isOrgSubscribed()) || true; // allow true due to public ID-based invitation link
+      allow list: if isSuperAdmin() || (isSignedIn() && existing().orgId == getUserOrgId() && isOrgSubscribed());
+      allow create: if (isSuperAdmin() || (isOrgAdmin() && incoming().orgId == getUserOrgId() && isOrgSubscribed())) && isValidProject(incoming());
+      allow update: if (isSuperAdmin() || (isOrgAdmin() && existing().orgId == getUserOrgId() && isOrgSubscribed())) && isValidProject(incoming());
+      
+      // Subcollections
+      match /boq/{itemId} {
+        allow read: if canAccessProject(projectId);
+        allow write: if isAdmin();
+      }
+
+      match /site_diaries/{diaryId} {
+        allow read: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId) && canAccessTool('site_diary') && isValidSiteEvent(incoming()) && incoming().status == 'Draft';
+        allow update: if canAccessProject(projectId) && canAccessTool('site_diary') 
+          && (
+            // User updating their own draft
+            (existing().userId == request.auth.uid && existing().status == 'Draft' && incoming().status in ['Draft', 'Pending_Approval']) ||
+            // Admin approving
+            (isAdmin() && existing().status == 'Pending_Approval' && incoming().status == 'Published')
+          );
+        allow delete: if isAdmin();
+      }
+
+      match /valuations/{valuationId} {
+        allow read: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId) && canAccessTool('valuations');
+        allow update: if canAccessProject(projectId) && canAccessTool('valuations') && incoming().status in ['Draft', 'Submitted', 'Approved'];
+      }
+
+      match /stakeholders/{stakeholderId} {
+        allow get: if true; // Allow reading by invite link directly
+        allow list: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId) && isValidStakeholder(incoming());
+        allow update: if (canAccessProject(projectId) && (
+          (isAdmin() && incoming().status in ['Awaiting_Response', 'Invited', 'Active']) ||
+          (isValidStakeholder(incoming()) && incoming().status == existing().status)
+        )) || (
+          // Public response flow
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'acceptedAt', 'declinedAt']) &&
+          incoming().status in ['Invited', 'Pending_Verification', 'Awaiting_Response']
+        );
+        allow delete: if isAdmin();
+      }
+
+      match /photos/{photoId} {
+        allow read: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId) && isValidPhoto(incoming());
+        allow update: if canAccessProject(projectId) && isAdmin();
+        allow delete: if canAccessProject(projectId) && (isAdmin() || (existing().uploadedBy == request.auth.uid));
+      }
+
+      match /tasks/{taskId} {
+        allow read: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId) && isValidTask(incoming());
+        allow update: if canAccessProject(projectId) && (
+          isAdmin() || 
+          (existing().createdBy == request.auth.uid) ||
+          (incoming().diff(existing()).affectedKeys().hasOnly(['status']))
+        );
+        allow delete: if canAccessProject(projectId) && (isAdmin() || (existing().createdBy == request.auth.uid));
+      }
+
+      match /weather_logs/{logId} {
+        allow read: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId); // System or user can create
+        allow update, delete: if isAdmin();
+      }
+
+      match /baseline_programs/{programId} {
+        allow read: if canAccessProject(projectId);
+        allow create, update: if canAccessProject(projectId) && (isAdmin() || canAccessTool('project_records'));
+        allow delete: if isAdmin();
+      }
+
+      match /labor_plant_logs/{logId} {
+        allow read: if canAccessProject(projectId);
+        allow create, update: if canAccessProject(projectId) && (isAdmin() || canAccessTool('project_records'));
+        allow delete: if isAdmin();
+      }
+
+      match /material_deliveries/{deliveryId} {
+        allow read: if canAccessProject(projectId);
+        allow create, update: if canAccessProject(projectId) && (isAdmin() || canAccessTool('project_records'));
+        allow delete: if isAdmin();
+      }
+
+      match /documents/{documentId} {
+        allow read: if canAccessProject(projectId);
+        allow create, update: if canAccessProject(projectId) && (isAdmin() || canAccessTool('information_release')) && isValidDocument(incoming());
+        allow delete: if isAdmin();
+      }
+
+      match /compliance/{complianceId} {
+        allow read: if canAccessProject(projectId);
+        allow create, update: if canAccessProject(projectId) && (isAdmin() || canAccessTool('compliance')) && isValidComplianceItem(incoming());
+        allow delete: if isAdmin();
+      }
+
+      match /resources/{resourceId} {
+        allow read: if canAccessProject(projectId);
+        allow create, update: if canAccessProject(projectId) && (isAdmin() || canAccessTool('project_records')) && isValidResource(incoming());
+        allow delete: if isAdmin();
+      }
+
+      match /rfis/{rfiId} {
+        allow read: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId) && isValidRfi(incoming());
+        allow update: if canAccessProject(projectId) && (
+          isAdmin() || 
+          (existing().creatorId == request.auth.uid && existing().status in ['Draft', 'Internal_Review']) ||
+          (existing().internalCheckerId == request.auth.uid && existing().status == 'Internal_Review') ||
+          (existing().responderId == request.auth.uid && existing().status == 'Published_Open') ||
+          (existing().status == 'Response_Received' && (request.auth.uid == existing().creatorId || isAdmin()))
+        );
+        allow delete: if isAdmin();
+      }
+
+      match /site_instructions/{siId} {
+        allow read: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId) && isValidSiteInstruction(incoming());
+        allow update: if canAccessProject(projectId) && isValidSiteInstruction(incoming());
+        allow delete: if isAdmin();
+      }
+
+      match /baseline_records/{recordId} {
+        allow read: if canAccessProject(projectId);
+        allow write: if isAdmin();
+      }
+
+      match /baseline_records/{recordId} {
+        allow read: if canAccessProject(projectId);
+        allow create, update: if canAccessProject(projectId) && isAdmin();
+        allow delete: if isAdmin();
+      }
+
+      match /audit_logs/{logId} {
+        allow read: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId); // Admin validation can be done in UI or rules, but let's allow project members to create audit logs (or admins)
+      }
+
+      match /activities/{activityId} {
+        allow read: if canAccessProject(projectId);
+        allow create: if canAccessProject(projectId);
+        allow update, delete: if isAdmin();
+      }
+    }
+  }
+}

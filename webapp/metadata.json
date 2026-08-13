@@ -1,0 +1,6 @@
+{
+  "name": "OLIVE by Unicon South Africa",
+  "description": "Professional construction management platform for the Southern African sector. Supports JBCC, GCC, NEC, and FIDIC contractual frameworks for project orchestration and compliance.",
+  "requestFramePermissions": ["geolocation", "camera"],
+  "majorCapabilities": []
+}

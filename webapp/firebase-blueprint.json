@@ -1,0 +1,534 @@
+{
+  "entities": {
+    "Organization": {
+      "title": "Organization",
+      "description": "Tenant organization.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "registrationNumber": { "type": "string" },
+        "vatNumber": { "type": "string" },
+        "physicalAddress": { "type": "string" },
+        "postalAddress": { "type": "string" },
+        "contactPhone": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "professionalBody": { "type": "string" },
+        "professionalRegNumber": { "type": "string" },
+        "practiceNumber": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "User": {
+      "title": "User",
+      "description": "System user with specific roles and permissions.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "fullName": { "type": "string" },
+        "title": { "type": "string" },
+        "orgId": { "type": "string" },
+        "role": { "type": "string", "enum": ["Super_Admin", "User", "Org_Admin"] },
+        "allowedProjects": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "allowedTools": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Construction project with specific contract details.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "orgId": { "type": "string" },
+        "contractType": { "type": "string", "enum": ["JBCC", "GCC", "NEC", "FIDIC"] },
+        "retentionRate": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pre-Design", "Design", "Pre-construction", "Construction", "Post-construction"] },
+        "plannedStartDate": { "type": "string", "format": "date" },
+        "plannedDuration": { "type": "number" },
+        "location": { "type": "string" },
+        "coordinates": { 
+          "type": "object", 
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "clientDetails": { 
+          "type": "object", 
+          "properties": { 
+            "name": { "type": "string" }, 
+            "address": { "type": "string" }, 
+            "contact": { "type": "string" } 
+          } 
+        },
+        "professionals": {
+          "type": "object",
+          "properties": {
+            "projectManager": { "type": "string" },
+            "architect": { "type": "string" },
+            "quantitySurveyor": { "type": "string" },
+            "structuralEngineer": { "type": "string" },
+            "civilEngineer": { "type": "string" },
+            "mechanicalEngineer": { "type": "string" },
+            "electricalEngineer": { "type": "string" },
+            "fireEngineer": { "type": "string" },
+            "healthSafety": { "type": "string" }
+          }
+        },
+        "principalContractor": { "type": "string" },
+        "nsContractors": { "type": "string" },
+        "tradeContractors": { "type": "string" },
+        "policies": {
+          "type": "object",
+          "properties": {
+            "requirePhotosForDiary": { "type": "boolean" },
+            "auditLevel": { "type": "string", "enum": ["Standard", "High", "Critical"] },
+            "automaticWeatherAlerts": { "type": "boolean" }
+          }
+        },
+        "geofence": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" },
+            "radius": { "type": "number" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "contractType", "status", "orgId"]
+    },
+    "BOQItem": {
+      "title": "BOQ Item",
+      "description": "Bill of Quantities line item.",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "unit": { "type": "string" },
+        "quantity": { "type": "number" },
+        "rate": { "type": "number" },
+        "total": { "type": "number" }
+      },
+      "required": ["description", "quantity", "rate"]
+    },
+    "SiteEvent": {
+      "title": "Site Event",
+      "description": "Daily site diary entry logging progress or issues.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "note": { "type": "string" },
+        "rawNote": { "type": "string" },
+        "gps": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "note", "createdAt"]
+    },
+    "Valuation": {
+      "title": "Valuation",
+      "description": "Monthly payment certificate valuation.",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "month": { "type": "string" },
+        "progressData": { "type": "object" },
+        "certificateUrl": { "type": "string" },
+        "aiAnalysis": { "type": "string" },
+        "status": { "type": "string", "enum": ["Draft", "Submitted", "Approved"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["projectId", "month", "status"]
+    },
+    "Stakeholder": {
+      "title": "Stakeholder",
+      "description": "Person assigned to a project with specific contractual role.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "company": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending_Verification", "Invited", "Active"] },
+        "digitalAgreement": { "type": "boolean" },
+        "invitedBy": { "type": "string" },
+        "invitedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "role", "email", "status"]
+    },
+    "ProjectPhoto": {
+      "title": "Project Photo",
+      "description": "Visual record of site progress with AI tagging.",
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "uploadedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["url", "tags", "uploadedBy", "createdAt"]
+    },
+    "ProjectTask": {
+      "title": "Project Task",
+      "description": "Task or milestone within a project, potentially AI-generated.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "In Progress", "Completed"] },
+        "priority": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"] },
+        "startDate": { "type": "string", "format": "date" },
+        "dueDate": { "type": "string", "format": "date" },
+        "isMilestone": { "type": "boolean" },
+        "assigneeId": { "type": "string" },
+        "assigneeName": { "type": "string" },
+        "dependencyIds": { "type": "array", "items": { "type": "string" } },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "status", "priority", "createdBy", "createdAt"]
+    },
+    "WeatherLog": {
+      "title": "Weather Log",
+      "description": "Hourly weather data for a project location.",
+      "type": "object",
+      "properties": {
+        "temp": { "type": "number" },
+        "condition": { "type": "string" },
+        "humidity": { "type": "number" },
+        "windSpeed": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["temp", "condition", "timestamp"]
+    },
+    "BaselineProgram": {
+      "title": "Baseline Program",
+      "description": "Project baseline program data extracted from PDF.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "content": { "type": "string" },
+        "milestones": { "type": "array", "items": { "type": "object" } },
+        "uploadedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "content", "uploadedBy", "createdAt"]
+    },
+    "LaborPlantRecord": {
+      "title": "Labor and Plant Record",
+      "description": "Daily snapshot of site resources.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "labor": { 
+          "type": "array", 
+          "items": { 
+            "type": "object",
+            "properties": {
+              "trade": { "type": "string" },
+              "count": { "type": "number" },
+              "hours": { "type": "number" }
+            }
+          }
+        },
+        "plant": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "status": { "type": "string", "enum": ["Active", "Idle", "Broken"] },
+              "hours": { "type": "number" }
+            }
+          }
+        },
+        "recordedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "labor", "plant", "recordedBy", "createdAt"]
+    },
+    "MaterialDelivery": {
+      "title": "Material Delivery",
+      "description": "Record of materials arriving on site.",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "quantity": { "type": "string" },
+        "supplier": { "type": "string" },
+        "docketNumber": { "type": "string" },
+        "status": { "type": "string", "enum": ["Accepted", "Rejected", "Partial"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["description", "quantity", "status", "timestamp"]
+    },
+    "ProjectDocument": {
+      "title": "Project Document",
+      "description": "General project document (Specification, Agreement, etc).",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string" },
+        "data": { "type": "string", "description": "Base64 encoded file data for small files/media." },
+        "mimeType": { "type": "string" },
+        "category": { "type": "string", "enum": ["Drawing", "Specification", "Agreement", "Contract", "Minute", "Other"] },
+        "version": { "type": "string" },
+        "uploadedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "url", "category", "uploadedBy", "createdAt"]
+    },
+    "ProjectResource": {
+      "title": "Project Resource",
+      "description": "Human, Material, or Plant & Equipment resource for a project.",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["Human", "Material", "PlantEquipment"] },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "qrCodeData": { "type": "string" }, 
+        "geofenceEnabled": { "type": "boolean" },
+        "location": {
+           "type": "object",
+           "properties": {
+              "lat": { "type": "number" },
+              "lng": { "type": "number" }
+           }
+        },
+        "status": { "type": "string" },
+        "boqRefId": { "type": "string" },
+        "humanRole": { "type": "string" },
+        "idCardPrinted": { "type": "boolean" },
+        "equipmentSize": { "type": "string", "enum": ["Small", "Large", "None"] },
+        "materialUnit": { "type": "string" },
+        "materialBoqQty": { "type": "number" },
+        "materialReceivedQty": { "type": "number" },
+        "materialReturnedQty": { "type": "number" },
+        "materialLossesQty": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" }
+      },
+      "required": ["type", "name", "createdAt"]
+    },
+    "ProjectComplianceItem": {
+      "title": "Project Compliance Item",
+      "description": "Statutory and project compliance item (Health & Safety, Environmental, etc.).",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string", "enum": ["Health_Safety", "Environmental", "Labor", "Quality", "General"] },
+        "country": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Met", "Not_Applicable", "Expired"] },
+        "metByUserId": { "type": "string" },
+        "metAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" }
+      },
+      "required": ["title", "category", "status", "createdAt"]
+    },
+    "RequestForInformation": {
+      "title": "Request for Information (RFI)",
+      "description": "Formal project query with lifecycle auditing and spatial pinning.",
+      "type": "object",
+      "properties": {
+        "rfiNumber": { "type": "string" },
+        "title": { "type": "string" },
+        "query": { "type": "string" },
+        "originalQuery": { "type": "string" },
+        "edits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "content": { "type": "string" },
+              "authorInitials": { "type": "string" },
+              "timestamp": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "status": { "type": "string", "enum": ["Draft", "Internal_Review", "Published_Open", "Response_Received", "Pending_Closure", "Closed"] },
+        "creatorId": { "type": "string" },
+        "internalCheckerId": { "type": "string" },
+        "responderId": { "type": "string" },
+        "observerIds": { "type": "array", "items": { "type": "string" } },
+        "drawingRef": {
+          "type": "object",
+          "properties": {
+            "documentId": { "type": "string" },
+            "revision": { "type": "string" },
+            "pinX": { "type": "number" },
+            "pinY": { "type": "number" }
+          }
+        },
+        "response": { "type": "string" },
+        "responseAuthorId": { "type": "string" },
+        "responseType": { "type": "string", "enum": ["Clarification", "SiteInstruction"] },
+        "responses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "content": { "type": "string" },
+              "authorId": { "type": "string" },
+              "authorName": { "type": "string" },
+              "type": { "type": "string" },
+              "siteInstructionId": { "type": "string" },
+              "createdAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "siteInstructionId": { "type": "string" },
+        "closureVotes": {
+          "type": "object",
+          "properties": {
+            "contractor": { "type": "boolean" },
+            "principalAgent": { "type": "boolean" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["rfiNumber", "title", "query", "status", "creatorId", "createdAt"]
+    },
+    "SiteInstruction": {
+      "title": "Site Instruction (SI)",
+      "description": "Formal instruction issued by the Principal Agent or Engineer to the Contractor.",
+      "type": "object",
+      "properties": {
+        "siNumber": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "rfiId": { "type": "string" },
+        "issuedById": { "type": "string" },
+        "issuedByName": { "type": "string" },
+        "issuedToId": { "type": "string" },
+        "status": { "type": "string", "enum": ["Draft", "Issued", "Acknowledged", "Completed", "Cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["siNumber", "title", "description", "issuedById", "status", "createdAt"]
+    },
+    "UserPreference": {
+      "title": "User Preference",
+      "description": "User-specific settings and state tracking.",
+      "type": "object",
+      "properties": {
+        "tutorialCompleted": { "type": "boolean" },
+        "darkMode": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notifications like system alerts, mentions, or invites.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["Info", "Urgent", "Invite", "System"] },
+        "read": { "type": "boolean" },
+        "actionUrl": { "type": "string" },
+        "projectId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "message", "type", "read", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User specific notifications."
+    },
+    "/user_preferences/{userId}": {
+      "schema": "UserPreference",
+      "description": "User preferences and onboarding status."
+    },
+    "/organizations/{orgId}": {
+      "schema": "Organization",
+      "description": "Tenant organizations."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and roles."
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Project configurations."
+    },
+    "/projects/{projectId}/compliance/{complianceId}": {
+      "schema": "ProjectComplianceItem",
+      "description": "Project statutory compliance tracking."
+    },
+    "/projects/{projectId}/resources/{resourceId}": {
+      "schema": "ProjectResource",
+      "description": "Project resources (Human, Material, Plant/Equipment)."
+    },
+    "/projects/{projectId}/boq/{itemId}": {
+      "schema": "BOQItem",
+      "description": "Bill of Quantities for a project."
+    },
+    "/projects/{projectId}/site_diaries/{diaryId}": {
+      "schema": "SiteEvent",
+      "description": "Site diary entries for a project."
+    },
+    "/projects/{projectId}/valuations/{valuationId}": {
+      "schema": "Valuation",
+      "description": "Monthly valuations and payment certificates."
+    },
+    "/projects/{projectId}/stakeholders/{stakeholderId}": {
+      "schema": "Stakeholder",
+      "description": "Stakeholders and professional team members for a project."
+    },
+    "/projects/{projectId}/photos/{photoId}": {
+      "schema": "ProjectPhoto",
+      "description": "Site progress imagery with automated classification."
+    },
+    "/projects/{projectId}/tasks/{taskId}": {
+      "schema": "ProjectTask",
+      "description": "Project tasks and milestones."
+    },
+    "/projects/{projectId}/weather_logs/{logId}": {
+      "schema": "WeatherLog",
+      "description": "Hourly weather tracking."
+    },
+    "/projects/{projectId}/baseline_programs/{programId}": {
+      "schema": "BaselineProgram",
+      "description": "Project baseline programs."
+    },
+    "/projects/{projectId}/labor_plant_logs/{logId}": {
+      "schema": "LaborPlantRecord",
+      "description": "Daily labor and plant records."
+    },
+    "/projects/{projectId}/material_deliveries/{deliveryId}": {
+      "schema": "MaterialDelivery",
+      "description": "Site material delivery logs."
+    },
+    "/projects/{projectId}/documents/{documentId}": {
+      "schema": "ProjectDocument",
+      "description": "General project documents filtered by category."
+    },
+    "/projects/{projectId}/rfis/{rfiId}": {
+      "schema": "RequestForInformation",
+      "description": "Contractual RFIs with spatial correlation."
+    },
+    "/projects/{projectId}/site_instructions/{siId}": {
+      "schema": "SiteInstruction",
+      "description": "Formal Site Instructions (SIs)."
+    }
+  }
+}
