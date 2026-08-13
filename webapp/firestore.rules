@@ -15,6 +15,7 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
     function isEmailVerified() { return request.auth.token.email_verified == true; }
     function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function isServerTimestamp(v) { return v == request.time; }
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
     
@@ -63,10 +64,17 @@ service cloud.firestore {
     }
 
     // --- Validation Helpers ---
+    // Note: isValidUser is intentionally NOT used to gate `orgId`/`role` on
+    // self-writes — that's handled explicitly in the /users rules below,
+    // since a plain field-shape check can't express "only via the org-
+    // bootstrap path or an admin."
     function isValidUser(data) {
-      return data.email is string && data.email.size() <= 200
+      return data.keys().hasOnly(['email', 'role', 'orgId', 'fullName', 'title', 'allowedProjects', 'allowedTools', 'createdAt'])
+          && data.email is string && data.email.size() <= 200
           && data.role in ['Super_Admin', 'User', 'Org_Admin']
           && (data.orgId is string || !data.keys().hasAny(['orgId']))
+          && (data.allowedProjects is list || !data.keys().hasAny(['allowedProjects']))
+          && (data.allowedTools is list || !data.keys().hasAny(['allowedTools']))
           && data.keys().hasAll(['email', 'role']);
     }
 
@@ -78,10 +86,16 @@ service cloud.firestore {
           && (data.policies is map || !data.keys().hasAny(['policies']))
           && (data.orgId is string || !data.keys().hasAny(['orgId']))
           && data.keys().hasAll(['name', 'contractType', 'status']);
+      // Deliberately no hasOnly() here: CreateProjectModal writes a wide,
+      // still-evolving set of KPI-seed fields (currency, initialActiveStaff,
+      // initialContractValue, etc.) not yet in firebase-blueprint.json.
+      // Locking this down needs the schema reconciled with the client first
+      // — see morning summary.
     }
 
     function isValidSiteEvent(data) {
-      return data.userId == request.auth.uid
+      return data.keys().hasOnly(['userId', 'userName', 'note', 'rawNote', 'gps', 'media', 'location', 'weather', 'status', 'createdAt', 'updatedAt'])
+          && data.userId == request.auth.uid
           && data.note is string && data.note.size() <= 10000
           && data.status in ['Draft', 'Pending_Approval', 'Published']
           && (data.media is list || !data.keys().hasAny(['media']))
@@ -91,15 +105,16 @@ service cloud.firestore {
     }
 
     function isValidStakeholder(data) {
-      return data.name is string && data.name.size() <= 200
+      return data.keys().hasOnly(['name', 'role', 'email', 'phone', 'company', 'digitalAgreement', 'tags', 'status', 'invitedBy', 'invitedByName', 'projectName', 'approvedBy', 'approvedByName', 'approvedAt', 'invitedAt', 'acceptedAt', 'declinedAt', 'createdAt'])
+          && data.name is string && data.name.size() <= 200
           && data.role is string
           && data.email is string
-          && data.status in ['Pending_Verification', 'Awaiting_Response', 'Invited', 'Active']
+          && data.status in ['Pending_Verification', 'Awaiting_Response', 'Invited', 'Active', 'Declined']
           && data.keys().hasAll(['name', 'role', 'email', 'status']);
     }
 
     function isValidPhoto(data) {
-      return data.url is string 
+      return data.url is string
           && data.tags is list
           && data.uploadedBy is string
           && data.keys().hasAll(['url', 'tags', 'uploadedBy', 'createdAt']);
@@ -129,11 +144,39 @@ service cloud.firestore {
           && data.keys().hasAll(['type', 'name', 'createdAt']);
     }
 
+    // NOTE: category enum intentionally includes both 'Labor' and 'Labour' —
+    // ProjectCompliance.tsx's UI and its AI-assist prompt both emit
+    // 'Labour', which previously didn't match this US-spelling-only enum
+    // and silently failed every save with that category. See morning
+    // summary: the client should be normalized to one spelling, but
+    // widening the rule is the safe fix that doesn't risk breaking existing
+    // 'Labor' records.
     function isValidComplianceItem(data) {
       return data.title is string && data.title.size() <= 200
-          && data.category in ['Health_Safety', 'Environmental', 'Labor', 'Quality', 'General']
+          && data.category in ['Health_Safety', 'Environmental', 'Labor', 'Labour', 'Quality', 'General']
           && data.status in ['Pending', 'Met', 'Not_Applicable', 'Expired']
           && data.keys().hasAll(['title', 'category', 'status', 'createdAt']);
+    }
+
+    function isValidBoqItem(data) {
+      return data.keys().hasOnly(['description', 'unit', 'quantity', 'rate', 'total'])
+          && data.description is string && data.description.size() <= 500
+          && data.quantity is number && data.quantity >= 0
+          && data.rate is number && data.rate >= 0
+          && (data.unit is string || !data.keys().hasAny(['unit']))
+          && (data.total is number || !data.keys().hasAny(['total']));
+    }
+
+    function isValidValuation(data) {
+      // hasOnly includes fields Valuations.tsx actually writes today
+      // (certificateNumber/grossAmount/retention/netAmount) which aren't
+      // yet in firebase-blueprint.json's documented Valuation schema —
+      // matched to the real client, not the stale doc.
+      return data.keys().hasOnly(['projectId', 'month', 'progressData', 'certificateUrl', 'certificateNumber', 'grossAmount', 'retention', 'netAmount', 'aiAnalysis', 'status', 'createdAt'])
+          && data.projectId is string
+          && data.month is string
+          && data.status in ['Draft', 'Submitted', 'Approved']
+          && data.keys().hasAll(['projectId', 'month', 'status']);
     }
 
     function isValidRfi(data) {
@@ -172,11 +215,13 @@ service cloud.firestore {
           && (data.professionalRegNumber is string || !data.keys().hasAny(['professionalRegNumber']))
           && (data.practiceNumber is string || !data.keys().hasAny(['practiceNumber']))
           && (data.subscriptionStatus is string || !data.keys().hasAny(['subscriptionStatus']))
-          && data.keys().hasAll(['name', 'createdAt']);
+          && data.createdBy is string
+          && data.keys().hasAll(['name', 'createdAt', 'createdBy']);
     }
 
     function isValidNotification(data) {
-      return data.title is string && data.title.size() <= 200
+      return data.keys().hasOnly(['title', 'message', 'type', 'read', 'actionUrl', 'projectId', 'createdAt'])
+          && data.title is string && data.title.size() <= 200
           && data.message is string && data.message.size() <= 500
           && data.type in ['Info', 'Urgent', 'Invite', 'System']
           && data.read is bool
@@ -187,12 +232,22 @@ service cloud.firestore {
 
     // --- Rules ---
 
-    // Organizations
+    // Organizations. `createdBy` binds an org to whoever bootstrapped it —
+    // the /users update rule below uses this to let a brand-new user
+    // self-assign Org_Admin on an org ONLY if they're the one who just
+    // created it, closing the "self-assign orgId to someone else's org"
+    // tenant-takeover path while keeping the self-serve signup flow working.
     match /organizations/{orgId} {
       allow get: if isSuperAdmin() || getUserOrgId() == orgId;
       allow list: if isSuperAdmin() || getUserOrgId() == orgId;
-      allow create: if isSignedIn() && isValidOrganization(incoming());
-      allow update: if isSuperAdmin() || (isOrgAdmin() && getUserOrgId() == orgId);
+      allow create: if isSignedIn() && isValidOrganization(incoming()) && incoming().createdBy == request.auth.uid;
+      // subscriptionStatus is intentionally excluded from what an Org_Admin
+      // can change on their own org — only Super_Admin may flip billing state.
+      allow update: if isSuperAdmin() || (
+        isOrgAdmin() && getUserOrgId() == orgId && isValidOrganization(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().get('subscriptionStatus', null) == existing().get('subscriptionStatus', null)
+      );
     }
 
     // User Preferences
@@ -202,11 +257,43 @@ service cloud.firestore {
 
     // Users
     match /users/{userId} {
-      allow get: if isSignedIn();
+      allow get: if isSuperAdmin() || request.auth.uid == userId || (isSignedIn() && existing().orgId == getUserOrgId());
       allow list: if isSuperAdmin() || (isSignedIn() && existing().orgId == getUserOrgId());
-      allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming()) && (isSuperAdmin() || incoming().role == 'User' || incoming().role == 'Org_Admin');
-      allow update: if isSuperAdmin() || request.auth.uid == userId || (isOrgAdmin() && existing().orgId == getUserOrgId());
-      
+
+      // orgId can never be set on create — a brand-new account always
+      // starts org-less. It's attached afterward either by the org-bootstrap
+      // self-update below, or by an admin inviting the user into their org.
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming())
+        && !incoming().keys().hasAny(['orgId'])
+        && (isSuperAdmin() || incoming().role == 'User' || incoming().role == 'Org_Admin');
+
+      allow update: if isSuperAdmin() || (
+        // An Org_Admin can manage teammates already in their own org, but
+        // can't move them to another org or grant Super_Admin.
+        isOrgAdmin() && existing().orgId == getUserOrgId()
+        && incoming().orgId == existing().orgId
+        && incoming().role != 'Super_Admin'
+        && isValidUser(incoming())
+      ) || (
+        request.auth.uid == userId && isValidUser(incoming()) && (
+          // Safe self-edit: profile fields only, never role/org/permissions.
+          incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'title'])
+          ||
+          // One-time org-bootstrap: only from "no org yet" straight to
+          // Org_Admin of an org this same user just created — see the
+          // organizations/{orgId}.createdBy check. This is what closes the
+          // "self-assign orgId to someone ELSE's org" tenant-takeover path
+          // while keeping the self-serve "create your company" flow working.
+          (
+            !existing().keys().hasAny(['orgId'])
+            && incoming().role == 'Org_Admin'
+            && incoming().orgId is string
+            && get(/databases/$(database)/documents/organizations/$(incoming().orgId)).data.createdBy == request.auth.uid
+            && incoming().diff(existing()).affectedKeys().hasOnly(['orgId', 'role'])
+          )
+        )
+      );
+
       // Notifications
       match /notifications/{notificationId} {
         allow read: if isSignedIn() && request.auth.uid == userId;
@@ -217,48 +304,63 @@ service cloud.firestore {
     }
 
     // Projects
+    // NOTE: the unauthenticated stakeholder-invite flow (InvitationPortal)
+    // used to depend on an unrestricted public `get` here ("|| true") to
+    // show the project name before signup. That's been replaced by
+    // denormalizing `projectName` onto the stakeholder invite doc itself
+    // (which already has its own public-by-id `get`) — see
+    // StakeholderRegistry.tsx / InvitationPortal.tsx. So this can go back
+    // to being properly tenant-scoped.
     match /projects/{projectId} {
-      allow get: if isSuperAdmin() || (isSignedIn() && existing().orgId == getUserOrgId() && isOrgSubscribed()) || true; // allow true due to public ID-based invitation link
+      allow get: if isSuperAdmin() || (isSignedIn() && existing().orgId == getUserOrgId() && isOrgSubscribed());
       allow list: if isSuperAdmin() || (isSignedIn() && existing().orgId == getUserOrgId() && isOrgSubscribed());
       allow create: if (isSuperAdmin() || (isOrgAdmin() && incoming().orgId == getUserOrgId() && isOrgSubscribed())) && isValidProject(incoming());
-      allow update: if (isSuperAdmin() || (isOrgAdmin() && existing().orgId == getUserOrgId() && isOrgSubscribed())) && isValidProject(incoming());
-      
+      allow update: if (isSuperAdmin() || (isOrgAdmin() && existing().orgId == getUserOrgId() && isOrgSubscribed()))
+        && isValidProject(incoming()) && incoming().orgId == existing().orgId;
+
       // Subcollections
       match /boq/{itemId} {
         allow read: if canAccessProject(projectId);
-        allow write: if isAdmin();
+        allow write: if isAdmin() && isValidBoqItem(incoming());
       }
 
       match /site_diaries/{diaryId} {
         allow read: if canAccessProject(projectId);
         allow create: if canAccessProject(projectId) && canAccessTool('site_diary') && isValidSiteEvent(incoming()) && incoming().status == 'Draft';
-        allow update: if canAccessProject(projectId) && canAccessTool('site_diary') 
+        allow update: if canAccessProject(projectId) && canAccessTool('site_diary')
+          && isValidSiteEvent(incoming())
+          && incoming().userId == existing().userId
           && (
-            // User updating their own draft
-            (existing().userId == request.auth.uid && existing().status == 'Draft' && incoming().status in ['Draft', 'Pending_Approval']) ||
-            // Admin approving
-            (isAdmin() && existing().status == 'Pending_Approval' && incoming().status == 'Published')
+            // User updating their own draft — can only touch content/status,
+            // never reassign authorship or backdate createdAt.
+            (existing().userId == request.auth.uid && existing().status == 'Draft' && incoming().status in ['Draft', 'Pending_Approval']
+              && incoming().createdAt == existing().createdAt
+              && incoming().diff(existing()).affectedKeys().hasOnly(['note', 'rawNote', 'media', 'location', 'weather', 'status', 'updatedAt'])) ||
+            // Admin approving — status transition only, nothing else changes.
+            (isAdmin() && existing().status == 'Pending_Approval' && incoming().status == 'Published'
+              && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
           );
         allow delete: if isAdmin();
       }
 
       match /valuations/{valuationId} {
         allow read: if canAccessProject(projectId);
-        allow create: if canAccessProject(projectId) && canAccessTool('valuations');
-        allow update: if canAccessProject(projectId) && canAccessTool('valuations') && incoming().status in ['Draft', 'Submitted', 'Approved'];
+        allow create: if canAccessProject(projectId) && canAccessTool('valuations') && isValidValuation(incoming());
+        allow update: if canAccessProject(projectId) && canAccessTool('valuations')
+          && isValidValuation(incoming()) && incoming().status in ['Draft', 'Submitted', 'Approved'];
       }
 
       match /stakeholders/{stakeholderId} {
-        allow get: if true; // Allow reading by invite link directly
+        allow get: if true; // Allow reading by invite link directly — see isValidStakeholder's hasOnly for what's exposed
         allow list: if canAccessProject(projectId);
         allow create: if canAccessProject(projectId) && isValidStakeholder(incoming());
         allow update: if (canAccessProject(projectId) && (
           (isAdmin() && incoming().status in ['Awaiting_Response', 'Invited', 'Active']) ||
           (isValidStakeholder(incoming()) && incoming().status == existing().status)
         )) || (
-          // Public response flow
+          // Public response flow (accept/decline via the invite link, pre-auth)
           incoming().diff(existing()).affectedKeys().hasOnly(['status', 'acceptedAt', 'declinedAt']) &&
-          incoming().status in ['Invited', 'Pending_Verification', 'Awaiting_Response']
+          incoming().status in ['Invited', 'Pending_Verification', 'Awaiting_Response', 'Declined']
         );
         allow delete: if isAdmin();
       }
@@ -283,7 +385,9 @@ service cloud.firestore {
 
       match /weather_logs/{logId} {
         allow read: if canAccessProject(projectId);
-        allow create: if canAccessProject(projectId); // System or user can create
+        allow create: if canAccessProject(projectId)
+          && incoming().temp is number && incoming().condition is string
+          && incoming().keys().hasAll(['temp', 'condition', 'timestamp']);
         allow update, delete: if isAdmin();
       }
 
@@ -326,26 +430,41 @@ service cloud.firestore {
       match /rfis/{rfiId} {
         allow read: if canAccessProject(projectId);
         allow create: if canAccessProject(projectId) && isValidRfi(incoming());
-        allow update: if canAccessProject(projectId) && (
-          isAdmin() || 
+        allow update: if canAccessProject(projectId) && isValidRfi(incoming()) && (
+          isAdmin() ||
           (existing().creatorId == request.auth.uid && existing().status in ['Draft', 'Internal_Review']) ||
           (existing().internalCheckerId == request.auth.uid && existing().status == 'Internal_Review') ||
           (existing().responderId == request.auth.uid && existing().status == 'Published_Open') ||
-          (existing().status == 'Response_Received' && (request.auth.uid == existing().creatorId || isAdmin()))
+          // Closure voting: both the creator and responder need to be able
+          // to write while the RFI sits in Response_Received AND
+          // Pending_Closure — the old rule only covered Response_Received,
+          // which deadlocked the second vote (RFIManager.tsx's
+          // handleVoteClosure moves status to Pending_Closure after the
+          // first vote, then the second voter's write was rejected).
+          // Restricted to closure fields only — this branch used to let the
+          // creator rewrite the entire RFI while Response_Received.
+          (existing().status in ['Response_Received', 'Pending_Closure']
+            && request.auth.uid in [existing().creatorId, existing().responderId]
+            && incoming().diff(existing()).affectedKeys().hasOnly(['closureVotes', 'status', 'updatedAt']))
         );
         allow delete: if isAdmin();
       }
 
       match /site_instructions/{siId} {
         allow read: if canAccessProject(projectId);
-        allow create: if canAccessProject(projectId) && isValidSiteInstruction(incoming());
-        allow update: if canAccessProject(projectId) && isValidSiteInstruction(incoming());
+        allow create: if canAccessProject(projectId) && isValidSiteInstruction(incoming()) && incoming().issuedById == request.auth.uid;
+        // The addressed party (issuedToId) may only progress the status
+        // forward (Acknowledge/Complete) — they can't rewrite the
+        // instruction's content. Only the issuer or an admin can edit it.
+        allow update: if canAccessProject(projectId) && isValidSiteInstruction(incoming()) && (
+          isAdmin() ||
+          existing().issuedById == request.auth.uid ||
+          (existing().issuedToId == request.auth.uid
+            && existing().status in ['Issued', 'Acknowledged']
+            && incoming().status in ['Acknowledged', 'Completed']
+            && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
+        );
         allow delete: if isAdmin();
-      }
-
-      match /baseline_records/{recordId} {
-        allow read: if canAccessProject(projectId);
-        allow write: if isAdmin();
       }
 
       match /baseline_records/{recordId} {
@@ -356,7 +475,12 @@ service cloud.firestore {
 
       match /audit_logs/{logId} {
         allow read: if canAccessProject(projectId);
-        allow create: if canAccessProject(projectId); // Admin validation can be done in UI or rules, but let's allow project members to create audit logs (or admins)
+        // Attribution required — BaselineSetupStepper.tsx and
+        // ProjectBaselineRecords.tsx both write exactly this shape.
+        allow create: if canAccessProject(projectId)
+          && incoming().userId == request.auth.uid
+          && incoming().action is string && incoming().details is string
+          && incoming().keys().hasAll(['action', 'details', 'userId', 'timestamp']);
       }
 
       match /activities/{activityId} {

@@ -80,7 +80,7 @@ export default function Settings({ user, userData }: { user: any, userData?: any
       if (organization) {
          await updateDoc(doc(db, 'organizations', organization.id), { ...orgData });
       } else {
-         const orgRef = await addDoc(collection(db, 'organizations'), { ...orgData, createdAt: serverTimestamp() });
+         const orgRef = await addDoc(collection(db, 'organizations'), { ...orgData, createdBy: user.uid, createdAt: serverTimestamp() });
          setOrganization({ id: orgRef.id, ...orgData });
          await updateDoc(doc(db, 'users', user.uid), { orgId: orgRef.id, role: 'Org_Admin' });
          // Alert user that they need to reload to get new claims

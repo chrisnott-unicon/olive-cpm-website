@@ -34,13 +34,16 @@ export default function InvitationPortal({ inviteId, projectId, onDone }: Invita
   useEffect(() => {
     async function fetchData() {
       try {
+        // Only the stakeholder invite doc is read here — it's the one path
+        // meant to be reachable pre-auth. It carries a denormalized
+        // `projectName` so this flow never needs a public read of the full
+        // /projects/{id} document (see firestore.rules).
         const sDoc = await getDoc(doc(db, `projects/${projectId}/stakeholders`, inviteId));
-        const pDoc = await getDoc(doc(db, 'projects', projectId));
 
-        if (sDoc.exists() && pDoc.exists()) {
+        if (sDoc.exists()) {
           setStakeholder(sDoc.data());
-          setProject(pDoc.data());
-          
+          setProject({ name: sDoc.data().projectName });
+
           if (sDoc.data().status === 'Invited') {
              setStatus('ACCEPTED');
           }
@@ -68,7 +71,7 @@ export default function InvitationPortal({ inviteId, projectId, onDone }: Invita
         setStatus('ACCEPTED');
       } else {
         await updateDoc(doc(db, `projects/${projectId}/stakeholders`, inviteId), {
-          status: 'Pending_Verification', // Reset or handle as declined
+          status: 'Declined',
           declinedAt: serverTimestamp()
         });
         setStatus('DECLINED');

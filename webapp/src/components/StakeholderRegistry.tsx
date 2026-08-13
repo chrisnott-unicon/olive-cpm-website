@@ -16,7 +16,8 @@ import {
   Smartphone,
   ShieldCheck,
   Briefcase,
-  Network
+  Network,
+  XSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -43,7 +44,7 @@ interface Stakeholder {
   company?: string;
   tags?: string[];
   digitalAgreement: boolean;
-  status: 'Active' | 'Invited' | 'Pending_Verification' | 'Awaiting_Response';
+  status: 'Active' | 'Invited' | 'Pending_Verification' | 'Awaiting_Response' | 'Declined';
   invitedBy?: string;
   invitedAt?: any;
   approvedBy?: string;
@@ -119,6 +120,9 @@ export default function StakeholderRegistry({ projectTarget, user, userData }: S
         status: 'Pending_Verification',
         invitedBy: user.uid,
         invitedByName: userData?.fullName || user.displayName,
+        // Denormalized so the unauthenticated invite-acceptance flow (InvitationPortal)
+        // never needs to read the full /projects/{id} document.
+        projectName: projectTarget.name,
         createdAt: serverTimestamp()
       };
 
@@ -355,6 +359,12 @@ export default function StakeholderRegistry({ projectTarget, user, userData }: S
                        <span className="text-[7px] font-black uppercase tracking-widest">Accepted</span>
                     </div>
                  )}
+                 {s.status === 'Declined' && (
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-red-50 text-red-700 border border-red-100 rounded-sm">
+                       <XSquare className="w-3 h-3" strokeWidth={2} />
+                       <span className="text-[7px] font-black uppercase tracking-widest">Declined</span>
+                    </div>
+                 )}
               </div>
 
               {s.tags && s.tags.length > 0 && (
@@ -386,12 +396,12 @@ export default function StakeholderRegistry({ projectTarget, user, userData }: S
 
               <div className="flex items-center justify-between pt-6 border-t border-zinc-50">
                  <div className="flex gap-2">
-                    {s.status === 'Pending_Verification' && userData?.role === 'Super_Admin' && (
-                      <button 
+                    {(s.status === 'Pending_Verification' || s.status === 'Declined') && userData?.role === 'Super_Admin' && (
+                      <button
                         onClick={() => approveInvite(s)}
                         className="px-4 py-2 bg-emerald-600 text-white text-[8px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center gap-2"
                       >
-                         <Check className="w-3 h-3" /> Approve Invite
+                         <Check className="w-3 h-3" /> {s.status === 'Declined' ? 'Re-send Invite' : 'Approve Invite'}
                       </button>
                     )}
                     {s.status === 'Awaiting_Response' && (
