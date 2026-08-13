@@ -4,7 +4,6 @@ import { db } from '../lib/firebase';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, deleteDoc, getDocs } from 'firebase/firestore';
 import { Box, Users, Truck, Factory, Search, QrCode, HardHat, Camera, UploadCloud, AlertTriangle, CheckCircle, TrendingUp, Cpu, RefreshCw, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { GoogleGenAI, Type } from "@google/genai";
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { extractMaterialDocketInfo } from '../services/aiService';
 

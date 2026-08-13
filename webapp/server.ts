@@ -3,6 +3,7 @@ import path from 'path';
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
 import firebaseConfig from './firebase-applet-config.json' assert { type: 'json' };
+import aiRoutes from './src/server/aiRoutes';
 
 dotenv.config();
 
@@ -21,7 +22,14 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-  app.use(express.json());
+  // Raised limit: photo/docket analysis routes send base64-encoded images.
+  app.use(express.json({ limit: '15mb' }));
+
+  app.get('/healthz', (_req, res) => res.status(200).send('ok'));
+
+  // Gemini calls stay server-side only — GEMINI_API_KEY must never reach
+  // the client bundle. See src/server/aiRoutes.ts.
+  app.use('/api/ai', aiRoutes);
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
@@ -40,9 +48,19 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
+  });
+
+  // Cloud Run sends SIGTERM on scale-down/redeploy — without this, Node's
+  // default behavior drops in-flight requests immediately instead of
+  // finishing them.
+  process.on('SIGTERM', () => {
+    server.close(() => process.exit(0));
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('Fatal startup error:', err);
+  process.exit(1);
+});

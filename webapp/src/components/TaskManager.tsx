@@ -29,7 +29,7 @@ import {
   doc, 
   serverTimestamp 
 } from 'firebase/firestore';
-import { GoogleGenAI, Type } from "@google/genai";
+import { generateAiTasks as generateAiTasksRemote } from '../services/aiService';
 
 interface ProjectTask {
   id: string;
@@ -173,37 +173,8 @@ export default function TaskManager({ projectId, user }: TaskManagerProps) {
   const generateAiTasks = async () => {
     setIsAiProcessing(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-      const prompt = `Review the following architectural drawing log or project data context:
-      "${aiInputContext || 'Standard construction project lifecycle'}"
-      
-      Extract or infer 5-8 critical tasks, milestones, and professional dependencies.`;
+      const generatedTasks = await generateAiTasksRemote(aiInputContext);
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          systemInstruction: "You are a senior construction project manager for Olive CPM. Your goal is to convert unstructured project data (like drawing logs or schedules) into a structured task matrix. Ensure priority reflects the complexity of construction operations. Milestone status should be reserved only for critical handovers or sign-offs.",
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                title: { type: Type.STRING, description: "Professional, concise task name" },
-                description: { type: Type.STRING, description: "Technical context or requirement" },
-                priority: { type: Type.STRING, enum: ["Low", "Medium", "High", "Critical"] },
-                isMilestone: { type: Type.BOOLEAN },
-                suggestedDueDaysFromNow: { type: Type.NUMBER }
-              },
-              required: ["title", "description", "priority", "isMilestone", "suggestedDueDaysFromNow"]
-            }
-          }
-        }
-      });
-
-      const generatedTasks = JSON.parse(response.text);
-      
       for (const t of generatedTasks) {
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + t.suggestedDueDaysFromNow);

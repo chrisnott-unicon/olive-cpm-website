@@ -21,7 +21,7 @@ import {
   getDocs,
   limit 
 } from 'firebase/firestore';
-import { GoogleGenAI, Type } from "@google/genai";
+import { extractBaselineMilestones, analyzeProgramAlignment as analyzeProgramAlignmentRemote } from '../services/aiService';
 import { motion, AnimatePresence } from 'motion/react';
 import * as pdfjs from 'pdfjs-dist';
 
@@ -78,45 +78,7 @@ export default function BaselineSummary({ projectId, user }: BaselineSummaryProp
         }
 
         // Use AI to extract key milestones
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-        
-        const extractionPrompt = `Analyze the following construction program text extracted from a PDF. 
-        Extract a comprehensive list of key tasks/milestones. 
-        For each item, identify:
-        1. "task" (title)
-        2. "baselineFinish" (finish date)
-        3. "duration" (days/weeks if mentioned)
-        4. "dependencies" (predecessor tasks if identifiable)
-        5. "weight" (relative importance 1-10)
-
-        PROGRAM TEXT:
-        ${fullText.substring(0, 8000)}
-        
-        Return ONLY a JSON array of objects.`;
-
-        const result = await ai.models.generateContent({
-           model: "gemini-3-flash-preview",
-           contents: extractionPrompt,
-           config: {
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: Type.ARRAY,
-                items: {
-                   type: Type.OBJECT,
-                   properties: {
-                      task: { type: Type.STRING },
-                      baselineFinish: { type: Type.STRING },
-                      duration: { type: Type.STRING },
-                      dependencies: { type: Type.ARRAY, items: { type: Type.STRING } },
-                      weight: { type: Type.NUMBER }
-                   },
-                   required: ["task", "baselineFinish"]
-                }
-              }
-           }
-        });
-
-        const milestones = JSON.parse(result.text || "[]");
+        const milestones = await extractBaselineMilestones(fullText.substring(0, 8000));
 
         await addDoc(collection(db, `projects/${projectId}/baseline_programs`), {
           name: file.name,
@@ -147,32 +109,9 @@ export default function BaselineSummary({ projectId, user }: BaselineSummaryProp
       const diarySnap = await getDocs(query(collection(db, `projects/${projectId}/site_diaries`), orderBy('createdAt', 'desc'), limit(15)));
       const diarySummary = diarySnap.docs.map(d => `${d.data().createdAt?.toDate().toLocaleDateString()}: ${d.data().note}`).join(' | ');
 
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-      const prompt = `You are a professional construction planner and delay analyst. 
-      Analyze the alignment between the Baseline Programme and actual Site Performance.
-      
-      BASELINE MILESTONES:
-      ${JSON.stringify(program.milestones)}
-      
-      RECENT WEATHER DATA (Last 30 entries):
-      ${weatherSummary}
-      
-      RECENT SITE DIARY LOGS:
-      ${diarySummary}
-      
-      TASK: 
-      1. Predict potential slippage for the upcoming milestones.
-      2. Identify specific risks (e.g., weather delays impacting exterior work, labor shortages noted in diaries).
-      3. Suggest contractual mitigation strategies (e.g., Clause 10.1 force majeure notice if applicable).
-      
-      FORMAT: Return a structured analysis with "Executive Summary", "Slippage Projections", and "Risk Mitigation". Use clear professional tone.`;
+      const analysisText = await analyzeProgramAlignmentRemote(program.milestones, weatherSummary, diarySummary);
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt
-      });
-
-      setActiveAnalysis(result.text || "Analysis pending.");
+      setActiveAnalysis(analysisText || "Analysis pending.");
     } catch (e) {
       console.error(e);
       alert("AI analysis failed. Ensure site diaries and weather logs contain data.");

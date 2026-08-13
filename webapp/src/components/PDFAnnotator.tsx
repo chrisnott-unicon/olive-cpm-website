@@ -3,7 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { Stage, Layer, Image as KonvaImage, Rect, Circle, Text } from 'react-konva';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ZoomIn, ZoomOut, Maximize, Target, Tags, PenTool, Hand, MessageSquare, Bot, FileText, ListFilter } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
+import { pdfTakeoff, analyzeDrawing } from '../services/aiService';
 import { collection, query, onSnapshot, doc, updateDoc, where, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 
@@ -108,24 +108,7 @@ export default function PDFAnnotator({ fileUrl, fileName, documentId, revision, 
     setIsAnalyzing(true);
     try {
       const base64Data = pageCanvas.toDataURL('image/jpeg', 0.8).replace(/^data:image\/jpeg;base64,/, '');
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) throw new Error("Missing Gemini API Key");
-      
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: [
-          {
-             role: 'user',
-             parts: [
-               { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
-               { text: "Perform a material takeoff based on this architectural drawing. Estimate quantities for concrete, steel, drywall, or relevant materials you can identify. Respond with a concise text report." }
-             ]
-          }
-        ]
-      });
-
-      const report = response.text;
+      const report = await pdfTakeoff(base64Data);
       const subject = encodeURIComponent(`Material Takeoff Report - ${fileName}`);
       const body = encodeURIComponent(report || 'No report generated.');
       window.location.href = `mailto:?subject=${subject}&body=${body}`;
@@ -144,25 +127,7 @@ export default function PDFAnnotator({ fileUrl, fileName, documentId, revision, 
       setIsAnalyzing(true);
       try {
         const base64Data = pageCanvas.toDataURL('image/jpeg', 0.8).replace(/^data:image\/jpeg;base64,/, '');
-      
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) throw new Error("Missing Gemini API Key");
-      
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: [
-          {
-             role: 'user',
-             parts: [
-               { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
-               { text: "Analyze this architectural drawing. Extract: 1. Sheet Title 2. Sheet Number 3. Revision number 4. Provide a very brief summary of what this drawing shows. Provide response in strict JSON format: { \"title\": \"...\", \"number\": \"...\", \"revision\": \"...\", \"summary\": \"...\" }" }
-             ]
-          }
-        ]
-      });
-
-      const text = response.text;
+      const text = await analyzeDrawing(base64Data);
       const jsonMatch = text.match(/```json\n([\s\S]*)\n```/) || text.match(/{[\s\S]*}/);
       if (jsonMatch) {
          setAiAnalysis(JSON.parse(jsonMatch[1] || jsonMatch[0]));

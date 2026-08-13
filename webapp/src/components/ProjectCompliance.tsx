@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../lib/firebase';
 import { collection, query, onSnapshot, orderBy, doc, addDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { CheckCircle2, Circle, AlertTriangle, Plus, Trash2, Bot, ShieldCheck, MapPin, ShieldAlert } from 'lucide-react';
+import { generateComplianceChecklist } from '../services/aiService';
 
 export default function ProjectComplianceHub({ projectTarget, user, userData }: any) {
   const [items, setItems] = useState<any[]>([]);
@@ -62,22 +63,8 @@ export default function ProjectComplianceHub({ projectTarget, user, userData }: 
   const handleAiAssist = async () => {
     setProcessing(true);
     try {
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + process.env.GEMINI_API_KEY, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Generate a JSON array of 5 crucial statutory compliance items required for a construction project located in ${projectTarget.location || 'South Africa'}. Each item should have: "title" (string), "description" (string), "category" (enum: "Health_Safety", "Environmental", "Labour", "Quality", "General"). Return ONLY valid JSON array.`
-            }]
-          }]
-        })
-      });
-      const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
-      const cleanJson = text.replace(/```json/g, '').replace(/```/g, '');
-      const newItems = JSON.parse(cleanJson);
-      
+      const newItems = await generateComplianceChecklist(projectTarget.location || 'South Africa');
+
       for (const item of newItems) {
         await addDoc(collection(db, 'projects', projectTarget.id, 'compliance'), {
           ...item,

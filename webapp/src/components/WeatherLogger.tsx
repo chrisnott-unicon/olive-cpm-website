@@ -25,7 +25,7 @@ import {
   getDocs,
   Timestamp 
 } from 'firebase/firestore';
-import { GoogleGenAI } from "@google/genai";
+import { weatherImpactSummary } from '../services/aiService';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 
@@ -107,8 +107,6 @@ export default function WeatherLogger({ projectId, projectCoordinates }: Weather
   const generateAiSummary = async () => {
     setIsSummarizing(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-      
       const logData = logs.slice(0, 24).map(l => ({
         time: l.timestamp.toLocaleTimeString(),
         temp: l.temp,
@@ -117,24 +115,9 @@ export default function WeatherLogger({ projectId, projectCoordinates }: Weather
         humidity: l.humidity
       }));
 
-      const prompt = `Act as a Senior Site Engineer. Analyze the last 24 hours of site weather data for Project ${projectId}:
-      ${JSON.stringify(logData)}
-      
-      Provide a "Weather Impact Report" focusing on:
-      1. CRITICAL PATH IMPACTS: Identify specific delays to tower cranes (if wind > 40km/h), concrete works (if temp < 5°C or rain), and earthworks.
-      2. WORKABILITY WINDOWS: When was the site most productive?
-      3. STANDING TIME: Quantify potential lost hours based on inclement weather.
-      4. SUMMARY: One paragraph executive summary.
-      5. RISK RATING: Assign a rating of [LOW, MODERATE, HIGH] for continuity.
+      const text = await weatherImpactSummary(projectId, logData);
 
-      Maintain a technical, data-driven AEC (Architecture, Engineering, Construction) industry tone.`;
-
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt
-      });
-
-      setSummary(result.text || "Summary analysis not available.");
+      setSummary(text || "Summary analysis not available.");
     } catch (error) {
       console.error("AI Summary Error:", error);
     } finally {
