@@ -1,0 +1,56 @@
+rules_version = '2';
+
+// Olive CPM data model:
+//   /tenants/{tenantId}                          - one per company (Unicon, future client companies)
+//   /tenants/{tenantId}/projects/{projectId}      - one per active site/contract
+//   /tenants/{tenantId}/projects/{projectId}/{collection}/{docId}
+//       collections: siteDiaries, fuelOrders, rfis, inspectionRequests, ...
+//
+// Every signed-in user carries custom claims { tenantId, role } set by an
+// admin (Cloud Function or Admin SDK script) at invite time. A user only
+// ever belongs to one tenant. Roles: owner, admin, manager, site, client.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function claims() {
+      return request.auth.token;
+    }
+
+    function belongsToTenant(tenantId) {
+      return signedIn() && claims().tenantId == tenantId;
+    }
+
+    function hasRole(tenantId, roles) {
+      return belongsToTenant(tenantId) && claims().role in roles;
+    }
+
+    match /tenants/{tenantId} {
+      allow read: if belongsToTenant(tenantId);
+      allow write: if hasRole(tenantId, ['owner', 'admin']);
+
+      match /projects/{projectId} {
+        allow read: if belongsToTenant(tenantId);
+        allow write: if hasRole(tenantId, ['owner', 'admin', 'manager']);
+
+        // Site records: site/manager roles can create, only management can
+        // edit or delete after the fact (keeps the audit trail defensible).
+        match /{collection}/{docId} {
+          allow read: if belongsToTenant(tenantId);
+          allow create: if belongsToTenant(tenantId)
+                         && request.resource.data.createdBy == request.auth.uid;
+          allow update, delete: if hasRole(tenantId, ['owner', 'admin', 'manager']);
+        }
+      }
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
