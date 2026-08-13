@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { toast } from 'sonner';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
@@ -43,6 +44,24 @@ interface FirestoreErrorInfo {
   }
 }
 
+// Callers up and down this codebase were catching Firestore errors and only
+// console.error-ing them (or catching this function's re-thrown error and
+// doing nothing with it) — a permission-denied rejection would silently
+// stop a save with no feedback, making a failed write look identical to a
+// successful one. This now always surfaces a toast, so that stops being
+// possible regardless of what the call site does with the re-thrown error.
+function toUserMessage(error: unknown, operationType: OperationType): string {
+  const code = (error as any)?.code;
+  if (code === 'permission-denied') {
+    return "You don't have permission to do that.";
+  }
+  if (code === 'unavailable') {
+    return 'Connection lost — check your network and try again.';
+  }
+  const verb = { create: 'save', update: 'save', delete: 'delete', list: 'load', get: 'load', write: 'save' }[operationType] || 'complete';
+  return `Failed to ${verb}. Please try again.`;
+}
+
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
@@ -61,6 +80,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     path
   }
   console.error('Firestore Error: ', JSON.stringify(errInfo));
+  toast.error(toUserMessage(error, operationType));
   throw new Error(JSON.stringify(errInfo));
 }
 

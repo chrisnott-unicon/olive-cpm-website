@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { ShieldAlert, Users, Settings as SettingsIcon, Save, Lock, UserPlus, Trash2, Key, UsersIcon, FileArchive } from 'lucide-react';
+import { ShieldAlert, Users, Settings as SettingsIcon, Save, Lock, UserPlus, Trash2, Key, UsersIcon, FileArchive, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SkeletalFrame } from './ArchitecturalDoodles';
 import StakeholderRegistry from './StakeholderRegistry';
 import ProjectBaselineRecords from './ProjectBaselineRecords';
 import ProjectAuditTrail from './ProjectAuditTrail';
-import { FileArchive, ShieldCheck } from 'lucide-react';
 
 interface ProjectAdminHubProps {
   projectTarget: any;

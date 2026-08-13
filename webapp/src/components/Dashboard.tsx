@@ -128,7 +128,7 @@ export default function Dashboard({ user, userData, selectedProjectId, onSelectP
     const q = query(collection(db, 'projects'), ...(constraints as any));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let data: any[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setProjects(data);
       
       let mockStaff = data.reduce((acc, p: any) => {

@@ -9,27 +9,38 @@ interface IFCViewerProps {
 
 export default function IFCViewer({ url, onClose }: IFCViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [viewer, setViewer] = useState<IfcViewerAPI | null>(null);
+  // A ref, not state: the cleanup closure below is captured once when the
+  // effect runs, before the viewer exists. Reading `viewer` state there
+  // would always see the null from that first render, so dispose() never
+  // ran and every model open/close leaked a WebGL context. The ref is
+  // mutated in place, so cleanup always sees the current instance.
+  const viewerRef = useRef<IfcViewerAPI | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
+    let cancelled = false;
 
     const initViewer = async () => {
       try {
         const ifcViewer = new IfcViewerAPI({ container: containerRef.current!, backgroundColor: new (window as any).THREE.Color(0xffffff) });
-        
+
         // Set up the path to the wasm files. By default, it expects them in the root of the served URL.
         // We will configure it to use a CDN to avoid needing local static files
         ifcViewer.IFC.setWasmPath('https://unpkg.com/web-ifc@0.0.39/');
-        
+
         await ifcViewer.IFC.loadIfcUrl(url);
-        
+
+        if (cancelled) {
+          ifcViewer.dispose();
+          return;
+        }
+
         // Add shadowing and edges
         ifcViewer.shadowDropper.renderShadow(ifcViewer.context.getScene().children[0].uuid);
-        
-        setViewer(ifcViewer);
+
+        viewerRef.current = ifcViewer;
         setLoading(false);
       } catch (err) {
         console.error("Failed to load IFC model:", err);
@@ -41,8 +52,10 @@ export default function IFCViewer({ url, onClose }: IFCViewerProps) {
     initViewer();
 
     return () => {
-      if (viewer) {
-        viewer.dispose();
+      cancelled = true;
+      if (viewerRef.current) {
+        viewerRef.current.dispose();
+        viewerRef.current = null;
       }
     };
   }, [url]);
@@ -81,10 +94,10 @@ export default function IFCViewer({ url, onClose }: IFCViewerProps) {
       </div>
 
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 p-2 bg-white/90 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-xl z-10">
-        <button onClick={() => viewer?.context.ifcCamera.cameraControls.zoomTo(0.5)} className="p-2 text-zinc-600 hover:text-architect-coal hover:bg-zinc-100 rounded-xl transition-colors">
+        <button onClick={() => viewerRef.current?.context.ifcCamera.cameraControls.zoomTo(0.5)} className="p-2 text-zinc-600 hover:text-architect-coal hover:bg-zinc-100 rounded-xl transition-colors">
           <ZoomIn className="w-5 h-5" />
         </button>
-        <button onClick={() => viewer?.context.ifcCamera.cameraControls.zoomTo(-0.5)} className="p-2 text-zinc-600 hover:text-architect-coal hover:bg-zinc-100 rounded-xl transition-colors">
+        <button onClick={() => viewerRef.current?.context.ifcCamera.cameraControls.zoomTo(-0.5)} className="p-2 text-zinc-600 hover:text-architect-coal hover:bg-zinc-100 rounded-xl transition-colors">
           <ZoomOut className="w-5 h-5" />
         </button>
       </div>

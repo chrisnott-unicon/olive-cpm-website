@@ -68,20 +68,29 @@ export default function GenericDocumentManager({ projectId, category, user }: Ge
       const reader = new FileReader();
       reader.onload = async (event) => {
         const base64 = event.target?.result as string;
-        
+
         try {
           await addDoc(collection(db, `projects/${projectId}/documents`), {
             name: file.name,
             url: base64,
+            mimeType: file.type,
             category,
             version: '1.0',
             uploadedBy: user.uid,
             createdAt: serverTimestamp()
           });
         } catch (error) {
-          handleFirestoreError(error, OperationType.CREATE, `projects/${projectId}/documents`);
+          // handleFirestoreError re-throws after logging — catch that too,
+          // otherwise it skips setIsUploading(false) below and the upload
+          // control stays disabled/spinning forever after any rejection
+          // (e.g. isValidDocument requiring mimeType, which every upload
+          // through this component used to fail without it).
+          try {
+            handleFirestoreError(error, OperationType.CREATE, `projects/${projectId}/documents`);
+          } catch (_) { /* already logged/surfaced by handleFirestoreError */ }
+        } finally {
+          setIsUploading(false);
         }
-        setIsUploading(false);
       };
       reader.readAsDataURL(file);
     } catch (error) {
