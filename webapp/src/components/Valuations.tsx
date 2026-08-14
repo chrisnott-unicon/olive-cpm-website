@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, onSnapshot, orderBy } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { collection, query, where, getDocs, addDoc, updateDoc, doc, serverTimestamp, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { generateValuationAnalysis } from '../services/aiService';
-import { 
-  Calculator, 
-  FileCheck, 
-  Sparkles, 
+import BOQManager from './BOQManager';
+import {
+  Calculator,
+  FileCheck,
+  Sparkles,
   TrendingUp,
   Download,
   Calendar,
   AlertCircle,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Send,
+  ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -35,6 +38,7 @@ export default function Valuations({ user, userData, projectTarget }: { user: an
 
   const currentProject = projectTarget || projects.find(p => p.id === selectedProject);
   const currencySymbol = getCurrencySymbol(currentProject?.currency);
+  const [boqItems, setBoqItems] = useState<any[]>([]);
 
   useEffect(() => {
     if (projectTarget) {
@@ -56,43 +60,76 @@ export default function Valuations({ user, userData, projectTarget }: { user: an
   useEffect(() => {
     if (!selectedProject) return;
     const q = query(
-      collection(db, `projects/${selectedProject}/valuations`), 
+      collection(db, `projects/${selectedProject}/valuations`),
       orderBy('createdAt', 'desc')
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setValuations(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${selectedProject}/valuations`);
+    });
+    return unsubscribe;
+  }, [selectedProject]);
+
+  useEffect(() => {
+    if (!selectedProject) return;
+    const q = query(collection(db, `projects/${selectedProject}/boq`), orderBy('createdAt', 'asc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setBoqItems(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${selectedProject}/boq`);
     });
     return unsubscribe;
   }, [selectedProject]);
 
   const handleRunValuation = async () => {
     if (!selectedProject) return;
+    if (boqItems.length === 0) {
+      alert('Add Bill of Quantities items below before generating a valuation — there is no BOQ to certify progress against yet.');
+      return;
+    }
     setIsGenerating(true);
-    
+
     try {
       const project = projectTarget || projects.find(p => p.id === selectedProject);
-      const boq = [
-        { section: 'Earthworks', total: 450000, progress: 0.8 },
-        { section: 'Concrete Works', total: 1200000, progress: 0.4 },
-        { section: 'Brickwork', total: 800000, progress: 0.1 },
-      ];
-      const fieldProgress = [
-        { task: 'Foundations', status: 'Completed', date: '2024-04-10' },
-        { task: 'Ground Floor Columns', status: 'In Progress', date: '2024-04-25' },
-      ];
+
+      // Real BOQ progress, not placeholder data.
+      const boq = boqItems.map(i => ({
+        section: i.description,
+        total: i.total || i.quantity * i.rate,
+        progress: (i.progressPercent || 0) / 100,
+      }));
+
+      // Real recent site activity, same pattern BaselineSummary.tsx uses
+      // for its program-alignment analysis.
+      const diarySnap = await getDocs(query(collection(db, `projects/${selectedProject}/site_diaries`), orderBy('createdAt', 'desc'), limit(15)));
+      const fieldProgress = diarySnap.docs.map(d => ({
+        task: d.data().note?.slice(0, 200) || '',
+        status: d.data().status,
+        date: d.data().createdAt?.toDate ? d.data().createdAt.toDate().toISOString().split('T')[0] : '',
+      }));
 
       const analysis = await generateValuationAnalysis(boq, fieldProgress, project?.contractType || 'JBCC');
-      
-      const valAmount = boq.reduce((acc, curr) => acc + (curr.total * curr.progress), 0);
-      const retentionVal = valAmount * (project?.retentionRate || 0.1);
+
+      const grossAmount = boq.reduce((acc, curr) => acc + (curr.total * curr.progress), 0);
+      const retentionVal = grossAmount * (project?.retentionRate || 0.1);
 
       await addDoc(collection(db, `projects/${selectedProject}/valuations`), {
         projectId: selectedProject,
         month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
-        certificateNumber: `VAL-${valAmount.toString().slice(-4)}`,
-        grossAmount: valAmount,
+        certificateNumber: `VAL-${Date.now().toString().slice(-6)}`,
+        grossAmount,
         retention: retentionVal,
-        netAmount: valAmount - retentionVal,
+        netAmount: grossAmount - retentionVal,
+        // Snapshot of exactly what was certified, for the audit trail —
+        // BOQ item progress keeps changing after this valuation is issued.
+        progressData: boqItems.map(i => ({
+          itemId: i.id,
+          description: i.description,
+          quantity: i.quantity,
+          rate: i.rate,
+          progressPercent: i.progressPercent || 0,
+        })),
         status: 'Draft',
         aiAnalysis: analysis,
         createdAt: serverTimestamp(),
@@ -100,9 +137,25 @@ export default function Valuations({ user, userData, projectTarget }: { user: an
 
       setActiveAnalysis(analysis);
     } catch (error) {
-      console.error("Valuation error:", error);
+      handleFirestoreError(error, OperationType.CREATE, `projects/${selectedProject}/valuations`);
     }
     setIsGenerating(false);
+  };
+
+  const handleSubmitValuation = async (valuationId: string) => {
+    try {
+      await updateDoc(doc(db, `projects/${selectedProject}/valuations`, valuationId), { status: 'Submitted' });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `projects/${selectedProject}/valuations/${valuationId}`);
+    }
+  };
+
+  const handleApproveValuation = async (valuationId: string) => {
+    try {
+      await updateDoc(doc(db, `projects/${selectedProject}/valuations`, valuationId), { status: 'Approved' });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `projects/${selectedProject}/valuations/${valuationId}`);
+    }
   };
 
   return (
@@ -180,7 +233,9 @@ export default function Valuations({ user, userData, projectTarget }: { user: an
                        <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-300 leading-none">STATUS:</span>
                        <span className="text-[10px] font-black uppercase tracking-[0.1em] text-olive-primary">{val.status}</span>
                     </div>
-                    <h4 className="text-2xl font-light text-architect-coal tracking-tight uppercase">CERTIFIED PORTION: {currencySymbol} {val.netAmount?.toLocaleString()}</h4>
+                    <h4 className="text-2xl font-light text-architect-coal tracking-tight uppercase">
+                      {val.status === 'Approved' ? 'CERTIFIED PORTION' : val.status === 'Submitted' ? 'PENDING APPROVAL' : 'DRAFT VALUATION'}: {currencySymbol} {val.netAmount?.toLocaleString()}
+                    </h4>
                   </div>
                 </div>
 
@@ -200,7 +255,25 @@ export default function Valuations({ user, userData, projectTarget }: { user: an
                 </div>
 
                 <div className="flex gap-2">
-                  <button 
+                  {val.status === 'Draft' && (
+                    <button
+                      onClick={() => handleSubmitValuation(val.id)}
+                      title="Submit for Approval"
+                      className="p-5 bg-zinc-50 text-zinc-400 hover:bg-olive-primary hover:text-white transition-all border border-zinc-50"
+                    >
+                      <Send className="w-4 h-4" strokeWidth={1} />
+                    </button>
+                  )}
+                  {val.status === 'Submitted' && (userData?.role === 'Super_Admin' || userData?.role === 'Org_Admin') && (
+                    <button
+                      onClick={() => handleApproveValuation(val.id)}
+                      title="Approve Certificate"
+                      className="p-5 bg-zinc-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all border border-zinc-50"
+                    >
+                      <ShieldCheck className="w-4 h-4" strokeWidth={1} />
+                    </button>
+                  )}
+                  <button
                     onClick={() => setActiveAnalysis(val.aiAnalysis)}
                     className="p-5 bg-zinc-50 text-zinc-400 hover:bg-olive-primary hover:text-white transition-all border border-zinc-50"
                   >
@@ -213,6 +286,8 @@ export default function Valuations({ user, userData, projectTarget }: { user: an
               </motion.div>
             ))}
           </div>
+
+          <BOQManager projectId={selectedProject} currencySymbol={currencySymbol} />
         </div>
       )}
 
