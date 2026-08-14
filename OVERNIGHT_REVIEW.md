@@ -104,24 +104,62 @@ several fields not in the documented schema, and Chris confirmed those
 are still evolving, so locking the rule down now would risk breaking
 project creation later.
 
+## Also cleaned up while Chris was traveling (his go-ahead to "chip away")
+
+- **Cross-tenant listener leak in App.tsx**: the sidebar projects
+  listener's unsubscribe was discarded, so switching accounts in the same
+  tab without a full reload could leave the previous account's listener
+  running and silently repopulate the sidebar with the wrong tenant's
+  projects. Tracked and cleaned up properly now; also stopped issuing a
+  doomed unfiltered query for a non-admin with no org yet.
+- **SiteDiary lifecycle bug**: the textarea/media controls/"Save Draft"
+  were only locked once an entry hit `Published`, not `Pending_Approval`
+  — the status the rules actually lock non-admin writes at. A user could
+  keep editing a submitted entry and get a silent rejection that looked
+  like a successful save. Also fixed the Approve button being gated to
+  Super_Admin only, when the rules (and the spec) allow Org_Admin too.
+- **8 `onSnapshot` listeners** (Dashboard ×2, ProjectPlanningHub,
+  ProjectResourceHub, ProjectCompliance, ProjectBaselineRecords,
+  BaselineSummary, TaskManager, StakeholderRegistry) now have error
+  callbacks — a permission-denied used to just stop the listener with no
+  explanation.
+- **RFI/Site Instruction action buttons** ("Issue to Internal QC",
+  "Publish to Professional Team", "Re-Open for Further Query", "Mark as
+  Completed") now only show to whoever the rules would actually let take
+  that action, instead of rendering for any viewer and silently failing
+  on click.
+- **Remaining silent failures surfaced as toasts**: DeliveryLog.tsx and
+  LaborPlantLog.tsx's listeners/submits, and a real unhandled-promise-
+  rejection bug in DocumentManager.tsx's upload handler that left the
+  control stuck spinning forever on any rejected write.
+- **LaborPlantLog.tsx**: an empty/partial quantity input could write
+  `NaN` into a statutory labour-count record — now clamped to a valid
+  non-negative integer.
+- **GanttChart.tsx**: an unparseable task date produced `Invalid Date`,
+  which passed a bare `filter(Boolean)` and poisoned the whole chart's
+  date-range calculation via `Math.min`/`Math.max`, not just the one
+  task with the bad date. Now guards on date validity explicitly.
+- **ProjectAdminHub.tsx's user listing was reading every user in the
+  system**, no org filter — an Org_Admin's "assign personnel" dropdown
+  leaked names/emails from unrelated companies. (Also: since the
+  tenant-takeover rules fix, that unfiltered query was actually already
+  being rejected outright for Org_Admins, so this had quietly gone from
+  "leak" to "broken feature" — fixed both by scoping the query to the
+  caller's own org.) Also swapped its four remaining bare
+  `console.error` catches for the toast pattern.
+
+Every commit in this batch passed `tsc --noEmit` and a full production
+build too.
+
 ## Still outstanding — lower priority, not blocking
 
-- Several `onSnapshot` listeners across the app have no error callback,
-  so a permission-denied failure just stops the listener silently
-  (found in Dashboard, ProjectPlanningHub, ProjectResourceHub,
-  ProjectCompliance, ProjectBaselineRecords, BaselineSummary, TaskManager,
-  StakeholderRegistry).
-- A few UI buttons let users attempt actions the rules will reject
-  (some RFI/Site-Instruction transition buttons show for people not
-  authorized to use them) — the data is safe, but the UX is misleading.
 - 8 remaining dependency advisories, all transitive (`websocket-driver`
   via firebase's unused Realtime Database bits, `form-data`, `postcss`,
   `nanoid`, `ws`, gRPC/Firestore client libs) — lower urgency than the
   three already patched.
-- A few components still bypass the centralized `handleFirestoreError`
-  toast with their own bare `console.error` (Valuations.tsx's remaining
-  edge cases, DeliveryLog.tsx, LaborPlantLog.tsx, DocumentManager.tsx's
-  unhandled-rejection path).
+- `isValidProject`/`isValidUser` still don't reject unexpected fields —
+  left open on purpose per Chris (`CreateProjectModal.tsx`'s field set is
+  still evolving).
 
 ## What to do next
 
