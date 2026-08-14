@@ -22,8 +22,12 @@ export default function Settings({ user, userData }: { user: any, userData?: any
   const [loading, setLoading] = useState(true);
   
   // App preferences state
+  // Neither of these actually persists anywhere or gates any real
+  // behavior yet (no Firestore write, and nothing reads them to decide
+  // whether to create a notification or format a date) — see the
+  // disabled + "Coming soon" treatment below rather than letting them
+  // look like working settings.
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [theme, setTheme] = useState('Light');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -280,31 +284,33 @@ export default function Settings({ user, userData }: { user: any, userData?: any
              <p className="text-xs text-zinc-500 font-medium mb-6">Customize your workspace experience.</p>
              
              <div className="space-y-4">
-                <div className="bg-white border border-zinc-100 p-6 rounded-2xl flex justify-between items-center shadow-sm">
+                <div className="bg-white border border-zinc-100 p-6 rounded-2xl flex justify-between items-center shadow-sm opacity-60">
                    <div className="flex items-center gap-4">
                       <Bell className="w-5 h-5 text-zinc-400" />
                       <div>
                          <p className="font-bold text-sm text-zinc-900">System Notifications</p>
-                         <p className="text-xs text-zinc-500 mt-1">Receive alerts for contract updates and BOQ warnings.</p>
+                         <p className="text-xs text-zinc-500 mt-1">Receive alerts for contract updates and BOQ warnings. <span className="italic">(Coming soon — not yet connected to real notification delivery.)</span></p>
                       </div>
                    </div>
-                   <button 
-                     onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                     className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${notificationsEnabled ? 'bg-olive-primary' : 'bg-zinc-200'}`}
+                   <button
+                     disabled
+                     title="Not yet implemented"
+                     aria-label="System notifications toggle (not yet implemented)"
+                     className="w-12 h-6 rounded-full relative flex items-center px-1 bg-zinc-200 cursor-not-allowed"
                    >
-                      <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${notificationsEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                      <div className="w-4 h-4 bg-white rounded-full shadow-sm" />
                    </button>
                 </div>
 
-                <div className="bg-white border border-zinc-100 p-6 rounded-2xl flex justify-between items-center shadow-sm">
+                <div className="bg-white border border-zinc-100 p-6 rounded-2xl flex justify-between items-center shadow-sm opacity-60">
                    <div className="flex items-center gap-4">
                       <Globe className="w-5 h-5 text-zinc-400" />
                       <div>
                          <p className="font-bold text-sm text-zinc-900">Regional Format</p>
-                         <p className="text-xs text-zinc-500 mt-1">Date and currency formats for your region.</p>
+                         <p className="text-xs text-zinc-500 mt-1">Date and currency formats for your region. <span className="italic">(Coming soon.)</span></p>
                       </div>
                    </div>
-                   <select className="px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold outline-none cursor-pointer">
+                   <select disabled title="Not yet implemented" className="px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold outline-none cursor-not-allowed">
                       <option>South Africa (ZAR, DD/MM/YYYY)</option>
                       <option>United Kingdom (GBP, DD/MM/YYYY)</option>
                       <option>United States (USD, MM/DD/YYYY)</option>
