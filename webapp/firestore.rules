@@ -159,12 +159,13 @@ service cloud.firestore {
     }
 
     function isValidBoqItem(data) {
-      return data.keys().hasOnly(['description', 'unit', 'quantity', 'rate', 'total'])
+      return data.keys().hasOnly(['description', 'unit', 'quantity', 'rate', 'total', 'progressPercent', 'createdAt', 'updatedAt'])
           && data.description is string && data.description.size() <= 500
           && data.quantity is number && data.quantity >= 0
           && data.rate is number && data.rate >= 0
           && (data.unit is string || !data.keys().hasAny(['unit']))
-          && (data.total is number || !data.keys().hasAny(['total']));
+          && (data.total is number || !data.keys().hasAny(['total']))
+          && (data.progressPercent is number && data.progressPercent >= 0 && data.progressPercent <= 100 || !data.keys().hasAny(['progressPercent']));
     }
 
     function isValidValuation(data) {
@@ -321,7 +322,9 @@ service cloud.firestore {
       // Subcollections
       match /boq/{itemId} {
         allow read: if canAccessProject(projectId);
-        allow write: if isAdmin() && isValidBoqItem(incoming());
+        // Same access tool as valuations — whoever certifies payment
+        // progress is the natural owner of BOQ items and their % complete.
+        allow write: if canAccessProject(projectId) && (isAdmin() || canAccessTool('valuations')) && isValidBoqItem(incoming());
       }
 
       match /site_diaries/{diaryId} {
@@ -487,6 +490,16 @@ service cloud.firestore {
         allow read: if canAccessProject(projectId);
         allow create: if canAccessProject(projectId);
         allow update, delete: if isAdmin();
+      }
+
+      // Atomic sequence counters for contractual reference numbers
+      // (RFI-001, SI-001, ...) — see getNextSequenceNumber() in
+      // src/lib/firebase.ts. Same access as creating the numbered document
+      // itself; nothing sensitive lives here beyond an integer.
+      match /counters/{counterName} {
+        allow read: if canAccessProject(projectId);
+        allow write: if canAccessProject(projectId)
+          && incoming().keys().hasOnly(['value']) && incoming().value is number;
       }
     }
   }
