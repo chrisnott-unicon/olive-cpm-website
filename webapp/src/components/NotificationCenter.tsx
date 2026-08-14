@@ -68,8 +68,9 @@ export default function NotificationCenter({ user }: { user: any }) {
 
   return (
     <div className="relative">
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
         className="relative p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
       >
         <Bell className="w-5 h-5" />
@@ -128,8 +129,9 @@ export default function NotificationCenter({ user }: { user: any }) {
                               {formatDistanceToNow(n.createdAt?.toDate ? n.createdAt.toDate() : new Date(), { addSuffix: true })}
                             </span>
                           </div>
-                          <button 
+                          <button
                             onClick={(e) => clearNotification(n.id, e)}
+                            aria-label="Dismiss notification"
                             className="text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
                           >
                             <X className="w-4 h-4" />

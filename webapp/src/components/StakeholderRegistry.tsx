@@ -450,8 +450,9 @@ export default function StakeholderRegistry({ projectTarget, user, userData }: S
                       </button>
                     )}
                  </div>
-                 <button 
+                 <button
                     onClick={() => removeStakeholder(s.id)}
+                    aria-label={`Remove ${s.name}`}
                     className="p-3 text-zinc-200 hover:text-red-700 transition-colors"
                  >
                     <X className="w-4 h-4" strokeWidth={1} />
@@ -490,7 +491,7 @@ export default function StakeholderRegistry({ projectTarget, user, userData }: S
                 <div className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto">
                    <div className="flex justify-between items-center mb-6 md:mb-10">
                       <h4 className="text-[10px] font-black tracking-[0.4em] text-zinc-300 uppercase">Input Credentials</h4>
-                      <button onClick={() => setShowAddModal(false)} className="text-zinc-300 hover:text-architect-coal">
+                      <button onClick={() => setShowAddModal(false)} aria-label="Close" className="text-zinc-300 hover:text-architect-coal">
                          <X className="w-6 h-6" strokeWidth={1} />
                       </button>
                    </div>

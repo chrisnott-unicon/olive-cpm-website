@@ -259,6 +259,7 @@ export default function Valuations({ user, userData, projectTarget }: { user: an
                     <button
                       onClick={() => handleSubmitValuation(val.id)}
                       title="Submit for Approval"
+                      aria-label="Submit valuation for approval"
                       className="p-5 bg-zinc-50 text-zinc-400 hover:bg-olive-primary hover:text-white transition-all border border-zinc-50"
                     >
                       <Send className="w-4 h-4" strokeWidth={1} />
@@ -268,6 +269,7 @@ export default function Valuations({ user, userData, projectTarget }: { user: an
                     <button
                       onClick={() => handleApproveValuation(val.id)}
                       title="Approve Certificate"
+                      aria-label="Approve certificate"
                       className="p-5 bg-zinc-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all border border-zinc-50"
                     >
                       <ShieldCheck className="w-4 h-4" strokeWidth={1} />
@@ -275,11 +277,18 @@ export default function Valuations({ user, userData, projectTarget }: { user: an
                   )}
                   <button
                     onClick={() => setActiveAnalysis(val.aiAnalysis)}
+                    title="View AI analysis"
+                    aria-label="View AI valuation analysis"
                     className="p-5 bg-zinc-50 text-zinc-400 hover:bg-olive-primary hover:text-white transition-all border border-zinc-50"
                   >
                     <FileCheck className="w-4 h-4" strokeWidth={1} />
                   </button>
-                  <button className="p-5 bg-zinc-50 text-zinc-300 hover:text-architect-coal transition-all border border-zinc-50">
+                  <button
+                    disabled
+                    title="Not yet implemented"
+                    aria-label="Download certificate (not yet implemented)"
+                    className="p-5 bg-zinc-50 text-zinc-200 border border-zinc-50 cursor-not-allowed"
+                  >
                     <Download className="w-4 h-4" strokeWidth={1} />
                   </button>
                 </div>

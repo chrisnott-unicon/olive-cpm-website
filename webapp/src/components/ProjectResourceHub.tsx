@@ -100,7 +100,7 @@ export default function ProjectResourceHub({ projectTarget, user, userData }: Pr
              className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-6 backdrop-blur-sm"
            >
              <div className="bg-zinc-900 p-8 rounded-3xl max-w-lg w-full relative">
-                <button onClick={() => setShowScanner(false)} className="absolute top-4 right-4 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+                <button onClick={() => setShowScanner(false)} aria-label="Close QR scanner" className="absolute top-4 right-4 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
                   <X className="w-5 h-5" />
                 </button>
                 <h3 className="text-xl font-black text-white mb-6 uppercase tracking-wider flex items-center gap-3"><QrCode className="w-6 h-6 text-olive-primary" /> Scan Resource QR Tag</h3>

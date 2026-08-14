@@ -121,7 +121,7 @@ export default function LaborPlantLog({ projectId, user }: { projectId: string; 
                <div className="space-y-4">
                   <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
                      <span className="text-[10px] font-black uppercase tracking-widest text-architect-coal">Daily Labour Force</span>
-                     <button onClick={addLaborRow} className="text-olive-primary hover:text-architect-coal transition-all"><Plus className="w-4 h-4" /></button>
+                     <button onClick={addLaborRow} aria-label="Add labour row" className="text-olive-primary hover:text-architect-coal transition-all"><Plus className="w-4 h-4" /></button>
                   </div>
                   {newLabor.map((row, i) => (
                     <div key={i} className="flex gap-2">
@@ -152,7 +152,7 @@ export default function LaborPlantLog({ projectId, user }: { projectId: string; 
                            setNewLabor(next);
                          }}
                        />
-                       <button onClick={() => setNewLabor(newLabor.filter((_, idx) => idx !== i))} className="text-zinc-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5"/></button>
+                       <button onClick={() => setNewLabor(newLabor.filter((_, idx) => idx !== i))} aria-label="Remove labour row" className="text-zinc-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5"/></button>
                     </div>
                   ))}
                </div>
@@ -161,7 +161,7 @@ export default function LaborPlantLog({ projectId, user }: { projectId: string; 
                <div className="space-y-4">
                   <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
                      <span className="text-[10px] font-black uppercase tracking-widest text-architect-coal">Site Plant & Equipment</span>
-                     <button onClick={addPlantRow} className="text-olive-primary hover:text-architect-coal transition-all"><Plus className="w-4 h-4" /></button>
+                     <button onClick={addPlantRow} aria-label="Add plant/equipment row" className="text-olive-primary hover:text-architect-coal transition-all"><Plus className="w-4 h-4" /></button>
                   </div>
                   {newPlant.map((row, i) => (
                     <div key={i} className="flex gap-2">
@@ -188,7 +188,7 @@ export default function LaborPlantLog({ projectId, user }: { projectId: string; 
                          <option>Idle</option>
                          <option>Broken</option>
                        </select>
-                       <button onClick={() => setNewPlant(newPlant.filter((_, idx) => idx !== i))} className="text-zinc-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5"/></button>
+                       <button onClick={() => setNewPlant(newPlant.filter((_, idx) => idx !== i))} aria-label="Remove plant/equipment row" className="text-zinc-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5"/></button>
                     </div>
                   ))}
                </div>

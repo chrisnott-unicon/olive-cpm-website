@@ -13,6 +13,9 @@ interface StakeholderMindMapProps {
 export default function StakeholderMindMap({ stakeholders, projectName, onClose }: StakeholderMindMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Exposes the d3 zoom behavior (created inside the render effect below) to
+  // the Zoom In/Out/Fit buttons, which live outside that effect's scope.
+  const zoomBehaviorRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
 
@@ -49,6 +52,7 @@ export default function StakeholderMindMap({ stakeholders, projectName, onClose 
       });
 
     svg.call(zoom as any);
+    zoomBehaviorRef.current = zoom;
 
     const tree = d3.tree().size([2 * Math.PI, Math.min(width, height) / 2.5]);
 
@@ -122,8 +126,9 @@ export default function StakeholderMindMap({ stakeholders, projectName, onClose 
             </p>
           </div>
         </div>
-        <button 
+        <button
           onClick={onClose}
+          aria-label="Close stakeholder mind map"
           className="p-4 bg-zinc-50 hover:bg-zinc-100 transition-colors border border-zinc-100"
         >
           <X className="w-6 h-6 text-zinc-400" />
@@ -159,13 +164,25 @@ export default function StakeholderMindMap({ stakeholders, projectName, onClose 
              </div>
              
              <div className="flex gap-1">
-                <button className="p-3 bg-white border border-zinc-100 text-zinc-400 hover:text-olive-primary transition-colors">
+                <button
+                  onClick={() => svgRef.current && zoomBehaviorRef.current && d3.select(svgRef.current).transition().duration(300).call(zoomBehaviorRef.current.scaleBy as any, 1.3)}
+                  aria-label="Zoom in"
+                  className="p-3 bg-white border border-zinc-100 text-zinc-400 hover:text-olive-primary transition-colors"
+                >
                   <ZoomIn className="w-4 h-4" />
                 </button>
-                <button className="p-3 bg-white border border-zinc-100 text-zinc-400 hover:text-olive-primary transition-colors">
+                <button
+                  onClick={() => svgRef.current && zoomBehaviorRef.current && d3.select(svgRef.current).transition().duration(300).call(zoomBehaviorRef.current.scaleBy as any, 0.7)}
+                  aria-label="Zoom out"
+                  className="p-3 bg-white border border-zinc-100 text-zinc-400 hover:text-olive-primary transition-colors"
+                >
                   <ZoomOut className="w-4 h-4" />
                 </button>
-                <button className="p-3 bg-white border border-zinc-100 text-zinc-400 hover:text-olive-primary transition-colors">
+                <button
+                  onClick={() => svgRef.current && zoomBehaviorRef.current && d3.select(svgRef.current).transition().duration(500).call(zoomBehaviorRef.current.transform as any, d3.zoomIdentity)}
+                  aria-label="Reset zoom to fit"
+                  className="p-3 bg-white border border-zinc-100 text-zinc-400 hover:text-olive-primary transition-colors"
+                >
                   <Maximize2 className="w-4 h-4" />
                 </button>
              </div>

@@ -219,7 +219,7 @@ export default function PDFAnnotator({ fileUrl, fileName, documentId, revision, 
                   <MessageSquare className="w-5 h-5 text-olive-primary" />
                   Link Pin to RFI
                 </h3>
-                <button onClick={() => setShowRfiLinkModal(null)} className="text-zinc-500 hover:text-white transition-colors">
+                <button onClick={() => setShowRfiLinkModal(null)} aria-label="Close" className="text-zinc-500 hover:text-white transition-colors">
                   <ArrowLeft className="w-5 h-5" />
                 </button>
               </div>
@@ -262,7 +262,7 @@ export default function PDFAnnotator({ fileUrl, fileName, documentId, revision, 
       {/* Topbar */}
       <div className="h-16 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-6 shrink-0">
          <div className="flex items-center gap-4">
-           <button onClick={onBack} className="w-10 h-10 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center hover:bg-zinc-700 hover:text-white transition-colors">
+           <button onClick={onBack} aria-label="Back to document list" className="w-10 h-10 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center hover:bg-zinc-700 hover:text-white transition-colors">
               <ArrowLeft className="w-5 h-5" />
            </button>
            <div className="flex flex-col">
@@ -272,23 +272,23 @@ export default function PDFAnnotator({ fileUrl, fileName, documentId, revision, 
          </div>
 
          <div className="flex items-center gap-2">
-            <button onClick={() => setToolMode('pan')} className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${toolMode === 'pan' ? 'bg-architect-coal text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}>
+            <button onClick={() => setToolMode('pan')} aria-label="Pan tool" className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${toolMode === 'pan' ? 'bg-architect-coal text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}>
               <Hand className="w-5 h-5" />
             </button>
-            <button onClick={() => setToolMode('pin')} className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${toolMode === 'pin' ? 'bg-olive-primary text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}>
+            <button onClick={() => setToolMode('pin')} aria-label="Pin/comment tool" className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${toolMode === 'pin' ? 'bg-olive-primary text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}>
               <MessageSquare className="w-5 h-5" />
             </button>
-            <button onClick={() => setToolMode('measure')} className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${toolMode === 'measure' ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}>
+            <button onClick={() => setToolMode('measure')} aria-label="Measurement tool" className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${toolMode === 'measure' ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}>
               <Target className="w-5 h-5" />
             </button>
             <div className="w-px h-6 bg-zinc-800 mx-2" />
-            <button onClick={handleZoomOut} className="w-10 h-10 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center hover:bg-zinc-700 hover:text-white transition-colors">
+            <button onClick={handleZoomOut} aria-label="Zoom out" className="w-10 h-10 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center hover:bg-zinc-700 hover:text-white transition-colors">
               <ZoomOut className="w-5 h-5" />
             </button>
              <div className="text-xs font-black text-zinc-400 w-12 text-center w-8">
                {Math.round(scale * 100)}%
              </div>
-            <button onClick={handleZoomIn} className="w-10 h-10 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center hover:bg-zinc-700 hover:text-white transition-colors">
+            <button onClick={handleZoomIn} aria-label="Zoom in" className="w-10 h-10 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center hover:bg-zinc-700 hover:text-white transition-colors">
               <ZoomIn className="w-5 h-5" />
             </button>
          </div>

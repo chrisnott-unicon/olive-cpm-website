@@ -86,6 +86,7 @@ export default function AgentDataGatheringFAB() {
 
         <button
           onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? 'Close data gathering menu' : 'Open data gathering menu'}
           className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white transition-all z-50 relative ${
             isOpen ? 'bg-zinc-800 rotate-45' : 'bg-olive-primary hover:bg-olive-primary/90 hover:scale-105'
           }`}

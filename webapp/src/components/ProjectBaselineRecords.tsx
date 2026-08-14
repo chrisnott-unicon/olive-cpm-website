@@ -204,8 +204,10 @@ export default function ProjectBaselineRecords({ projectTarget, user, userData }
                   </div>
                   <div className="flex gap-2">
                      <button
-                        className="p-2 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 transition-colors"
-                        title="Download Baseline Record"
+                        disabled
+                        className="p-2 bg-zinc-50 text-zinc-300 cursor-not-allowed transition-colors"
+                        title="Download not yet implemented"
+                        aria-label="Download baseline record (not yet implemented)"
                      >
                         <Download className="w-4 h-4" />
                      </button>
@@ -214,6 +216,7 @@ export default function ProjectBaselineRecords({ projectTarget, user, userData }
                           onClick={() => handleDeleteRecord(record.id)}
                           className="p-2 bg-red-50 hover:bg-red-100 text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                           title="Delete Record"
+                          aria-label="Delete baseline record"
                        >
                           <Trash2 className="w-4 h-4" />
                        </button>
@@ -239,7 +242,7 @@ export default function ProjectBaselineRecords({ projectTarget, user, userData }
                    <h3 className="text-sm font-black uppercase tracking-[0.2em]">Upload Baseline Record</h3>
                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1">Establish Permanent Contractual Reference</p>
                 </div>
-                <button onClick={() => setShowAddModal(false)} className="text-zinc-400 hover:text-white">
+                <button onClick={() => setShowAddModal(false)} aria-label="Close" className="text-zinc-400 hover:text-white">
                   <AlertCircle className="w-6 h-6" />
                 </button>
              </div>

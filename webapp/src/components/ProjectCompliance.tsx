@@ -165,7 +165,7 @@ export default function ProjectComplianceHub({ projectTarget, user, userData }: 
                  </div>
                  
                  {isAdmin && (
-                   <button onClick={() => handleDelete(item.id)} className="text-zinc-300 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                   <button onClick={() => handleDelete(item.id)} aria-label={`Remove ${item.title}`} className="text-zinc-300 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
                      <Trash2 className="w-4 h-4" />
                    </button>
                  )}

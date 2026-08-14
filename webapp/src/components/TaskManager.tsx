@@ -473,11 +473,12 @@ export default function TaskManager({ projectId, user }: TaskManagerProps) {
 
       {/* Task Filters & Search */}
       <div className="flex items-center gap-4 bg-zinc-50/50 p-4 rounded-xl border border-zinc-50">
-        <button 
+        <button
           onClick={toggleSelectAll}
+          aria-label={selectedTaskIds.size > 0 && selectedTaskIds.size === filteredTasks.length ? 'Deselect all tasks' : 'Select all tasks'}
           className={`w-5 h-5 border rounded flex items-center justify-center transition-all ${
-            selectedTaskIds.size > 0 && selectedTaskIds.size === filteredTasks.length 
-              ? 'bg-olive-primary border-olive-primary text-white' 
+            selectedTaskIds.size > 0 && selectedTaskIds.size === filteredTasks.length
+              ? 'bg-olive-primary border-olive-primary text-white'
               : 'bg-white border-zinc-200 text-transparent'
           }`}
         >
@@ -544,8 +545,9 @@ export default function TaskManager({ projectId, user }: TaskManagerProps) {
                  Archive
                </button>
                
-               <button 
+               <button
                  onClick={() => setSelectedTaskIds(new Set())}
+                 aria-label="Clear selection"
                  className="ml-4 p-2 text-white/40 hover:text-white"
                >
                  <X className="w-4 h-4" />
@@ -680,16 +682,18 @@ export default function TaskManager({ projectId, user }: TaskManagerProps) {
               } ${selectedTaskIds.has(task.id) ? 'ring-2 ring-olive-primary border-transparent' : ''}`}
             >
               <div className="flex flex-col gap-4 mt-1">
-                <button 
+                <button
                   onClick={() => toggleTaskSelection(task.id)}
+                  aria-label={selectedTaskIds.has(task.id) ? `Deselect ${task.title}` : `Select ${task.title}`}
                   className={`w-5 h-5 border rounded flex items-center justify-center transition-all ${
                     selectedTaskIds.has(task.id) ? 'bg-olive-primary border-olive-primary text-white' : 'bg-white border-zinc-100 text-transparent'
                   }`}
                 >
                   <CheckCircle2 className="w-3 h-3" />
                 </button>
-                <button 
+                <button
                   onClick={() => toggleTaskStatus(task)}
+                  aria-label={task.status === 'Completed' ? `Mark ${task.title} as pending` : `Mark ${task.title} as completed`}
                   className={`transition-all ${task.status === 'Completed' ? 'text-olive-primary' : 'text-zinc-200 hover:text-olive-primary'}`}
                 >
                   {task.status === 'Completed' ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
@@ -717,23 +721,26 @@ export default function TaskManager({ projectId, user }: TaskManagerProps) {
                        </span>
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                       <button 
+                       <button
                          onClick={() => setEditingTask(task)}
+                         aria-label={`Edit ${task.title}`}
                          className="p-2 hover:bg-zinc-50 text-zinc-300 hover:text-architect-coal transition-all rounded-sm"
                        >
                          <Edit className="w-4 h-4" />
                        </button>
                        {task.isMilestone && (
-                         <button 
+                         <button
                            onClick={() => addToStakeholderCalendar(task)}
                            title="Add to Stakeholder Calendars"
+                           aria-label="Add to stakeholder calendars"
                            className="p-2 hover:bg-olive-light text-olive-primary transition-all rounded-sm"
                          >
                            <Calendar className="w-4 h-4" />
                          </button>
                        )}
-                       <button 
+                       <button
                          onClick={() => deleteTask(task.id)}
+                         aria-label={`Delete ${task.title}`}
                          className="p-2 hover:bg-red-50 text-zinc-300 hover:text-red-500 transition-all rounded-sm"
                        >
                          <Trash2 className="w-4 h-4" />

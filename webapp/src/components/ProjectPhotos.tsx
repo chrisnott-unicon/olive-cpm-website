@@ -240,14 +240,16 @@ export default function ProjectPhotos({ projectTarget, user, userData }: Project
                       </p>
                     </div>
                     <div className="flex gap-2">
-                       <button 
+                       <button
                         onClick={() => setSelectedPhoto(photo)}
+                        aria-label="View full size"
                         className="p-2 bg-white/10 hover:bg-white/20 text-white transition-all"
                        >
                          <Maximize2 className="w-3 h-3" strokeWidth={1.5} />
                        </button>
-                       <button 
+                       <button
                         onClick={() => removePhoto(photo.id)}
+                        aria-label="Delete photo"
                         className="p-2 bg-white/10 hover:bg-red-500/40 text-white transition-all"
                        >
                          <Trash2 className="w-3 h-3" strokeWidth={1.5} />
@@ -316,8 +318,9 @@ export default function ProjectPhotos({ projectTarget, user, userData }: Project
                 ) : (
                   <img src={selectedPhoto.url} className="w-full h-full object-contain" alt="Enlarged progress" />
                 )}
-                <button 
+                <button
                   onClick={() => setSelectedPhoto(null)}
+                  aria-label="Close"
                   className="absolute top-8 right-8 text-white/40 hover:text-white transition-all"
                 >
                   <X className="w-8 h-8" strokeWidth={1} />

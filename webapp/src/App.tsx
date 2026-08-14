@@ -194,8 +194,9 @@ export default function App() {
                   </div>
                 </div>
                 {/* Mobile Close Button */}
-                <button 
-                  onClick={() => setIsSidebarOpen(false)} 
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  aria-label="Close sidebar"
                   className="md:hidden p-2 -mr-2 text-zinc-400 hover:text-architect-coal transition-colors"
                 >
                   <X className="w-5 h-5" strokeWidth={1} />
@@ -336,7 +337,7 @@ export default function App() {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <header className="h-20 border-b border-zinc-100 bg-white/60 backdrop-blur-xl flex items-center justify-between px-8 z-10 shrink-0">
           <div className="flex items-center gap-6">
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-zinc-400 hover:text-olive-primary transition-colors">
+            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'} className="p-2 text-zinc-400 hover:text-olive-primary transition-colors">
               {isSidebarOpen ? <X className="w-5 h-5" strokeWidth={1} /> : <Menu className="w-5 h-5" strokeWidth={1} />}
             </button>
             <div className="h-6 w-[1px] bg-zinc-100" />
@@ -351,8 +352,9 @@ export default function App() {
                <span className="text-[8px] font-black tracking-widest uppercase text-zinc-500">System Active</span>
              </div>
              <div className="h-6 w-[1px] bg-zinc-100" />
-             <button 
+             <button
                 onClick={logout}
+                aria-label="Sign out"
                 className="flex items-center gap-2 px-3 py-2 text-zinc-400 hover:text-red-800 transition-all text-[10px] font-black uppercase tracking-[0.2em] rounded-lg hover:bg-red-50"
               >
                 <LogOut className="w-4 h-4" strokeWidth={1} />

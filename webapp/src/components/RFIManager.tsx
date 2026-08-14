@@ -359,7 +359,7 @@ export default function RFIManager({ user, userData, projectTarget, stakeholders
                   <h2 className="text-2xl font-black text-architect-coal">{activeRfi.title}</h2>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button className="p-2 text-zinc-400 hover:text-architect-coal transition-colors">
+                  <button disabled title="Not yet implemented" aria-label="More actions (not yet implemented)" className="p-2 text-zinc-300 cursor-not-allowed transition-colors">
                     <MoreVertical className="w-5 h-5" />
                   </button>
                 </div>
@@ -391,7 +391,7 @@ export default function RFIManager({ user, userData, projectTarget, stakeholders
                       {activeRfi.query}
                     </p>
                     {activeRfi.status === RFIStatus.Draft && (
-                       <button className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-zinc-400 hover:text-olive-primary bg-white rounded-lg shadow-sm border border-zinc-100">
+                       <button disabled title="Not yet implemented" aria-label="Edit query (not yet implemented)" className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-zinc-300 cursor-not-allowed bg-white rounded-lg shadow-sm border border-zinc-100">
                          <Edit2 className="w-4 h-4" />
                        </button>
                     )}
@@ -814,7 +814,7 @@ export default function RFIManager({ user, userData, projectTarget, stakeholders
                   <h3 className="text-xl font-black text-architect-coal lowercase">Select Drawing</h3>
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-1">Select context for RFI Pin</p>
                 </div>
-                <button onClick={() => setShowDrawingSelector(false)} className="text-zinc-500 hover:text-architect-coal transition-colors p-2">
+                <button onClick={() => setShowDrawingSelector(false)} aria-label="Close" className="text-zinc-500 hover:text-architect-coal transition-colors p-2">
                   <XCircle className="w-8 h-8" strokeWidth={1.5} />
                 </button>
               </div>

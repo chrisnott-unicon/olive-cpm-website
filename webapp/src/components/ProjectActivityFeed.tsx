@@ -144,6 +144,7 @@ export default function ProjectActivityFeed({ projectId, user }: { projectId: st
         <button
           type="submit"
           disabled={!newComment.trim()}
+          aria-label="Post comment"
           className="bg-architect-coal text-white p-3 rounded-xl hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed px-6"
         >
           <Send className="w-5 h-5" />

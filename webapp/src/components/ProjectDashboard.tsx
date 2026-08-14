@@ -315,8 +315,9 @@ export default function ProjectDashboard({
     <div className="space-y-8 pb-20">
       <div className="bg-white/80 backdrop-blur-md p-3 md:p-4 border-b border-zinc-100 flex items-center justify-between gap-4 md:gap-6 -mt-4 md:-mt-10 lg:-mt-16 -mx-4 md:-mx-10 lg:-mx-16 px-4 md:px-10 lg:px-16 mb-4 md:mb-6 sticky top-0 z-10 transition-all">
         <div className="flex items-center gap-4 md:gap-6">
-          <button 
+          <button
             onClick={onBack}
+            aria-label="Back to project portfolio"
             className="w-8 md:w-10 h-8 md:h-10 bg-zinc-50 flex items-center justify-center text-zinc-500 hover:text-olive-primary transition-all rounded-full hover:bg-zinc-100 shrink-0"
           >
             <ArrowLeft className="w-3 md:w-4 h-3 md:h-4" strokeWidth={2} />

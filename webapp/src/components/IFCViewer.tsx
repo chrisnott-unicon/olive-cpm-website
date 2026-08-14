@@ -94,10 +94,10 @@ export default function IFCViewer({ url, onClose }: IFCViewerProps) {
       </div>
 
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 p-2 bg-white/90 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-xl z-10">
-        <button onClick={() => viewerRef.current?.context.ifcCamera.cameraControls.zoomTo(0.5)} className="p-2 text-zinc-600 hover:text-architect-coal hover:bg-zinc-100 rounded-xl transition-colors">
+        <button onClick={() => viewerRef.current?.context.ifcCamera.cameraControls.zoomTo(0.5)} aria-label="Zoom in" className="p-2 text-zinc-600 hover:text-architect-coal hover:bg-zinc-100 rounded-xl transition-colors">
           <ZoomIn className="w-5 h-5" />
         </button>
-        <button onClick={() => viewerRef.current?.context.ifcCamera.cameraControls.zoomTo(-0.5)} className="p-2 text-zinc-600 hover:text-architect-coal hover:bg-zinc-100 rounded-xl transition-colors">
+        <button onClick={() => viewerRef.current?.context.ifcCamera.cameraControls.zoomTo(-0.5)} aria-label="Zoom out" className="p-2 text-zinc-600 hover:text-architect-coal hover:bg-zinc-100 rounded-xl transition-colors">
           <ZoomOut className="w-5 h-5" />
         </button>
       </div>

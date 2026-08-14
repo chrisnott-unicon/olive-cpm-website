@@ -454,10 +454,11 @@ export default function ProjectAdminHub({ projectTarget, user, userData }: Proje
                       </div>
                       
                       {u.role !== 'Super_Admin' ? (
-                        <button 
+                        <button
                           onClick={() => toggleUserAccess(u.id, false)}
                           className="p-2 text-zinc-200 hover:text-red-500 transition-colors"
                           title="Revoke Access"
+                          aria-label={`Revoke ${u.fullName || u.email}'s access`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

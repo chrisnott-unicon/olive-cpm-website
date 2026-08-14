@@ -122,7 +122,7 @@ export default function BaselineSetupStepper({ projectTarget, user, userData, re
               <p className="text-[10px] font-black uppercase tracking-widest text-olive-primary">Step {activeStep + 1} of {steps.length}</p>
               <h3 className="text-lg font-bold text-architect-coal mt-1">{steps[activeStep].title}</h3>
             </div>
-            <button onClick={onClose} className="p-2 text-zinc-400 hover:text-architect-coal transition-colors">
+            <button onClick={onClose} aria-label="Close" className="p-2 text-zinc-400 hover:text-architect-coal transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>

@@ -148,7 +148,7 @@ export default function BOQManager({ projectId, currencySymbol }: { projectId: s
                 />
                 <span className="text-[10px] font-black text-olive-primary w-10 text-right">{item.progressPercent || 0}%</span>
               </div>
-              <button onClick={() => handleDelete(item.id)} className="p-2 text-zinc-300 hover:text-red-600 transition-colors">
+              <button onClick={() => handleDelete(item.id)} aria-label={`Remove ${item.description}`} className="p-2 text-zinc-300 hover:text-red-600 transition-colors">
                 <Trash2 className="w-4 h-4" strokeWidth={1.5} />
               </button>
             </div>
@@ -163,7 +163,7 @@ export default function BOQManager({ projectId, currencySymbol }: { projectId: s
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white w-full max-w-md p-8 relative z-10 shadow-2xl">
               <div className="flex items-center justify-between mb-6">
                 <h4 className="text-sm font-black uppercase tracking-widest text-architect-coal">Add BOQ Item</h4>
-                <button onClick={() => setShowAdd(false)}><X className="w-4 h-4 text-zinc-400" /></button>
+                <button onClick={() => setShowAdd(false)} aria-label="Close"><X className="w-4 h-4 text-zinc-400" /></button>
               </div>
               <form onSubmit={handleAdd} className="space-y-4">
                 <input required placeholder="Description (e.g. Earthworks - bulk excavation)" value={formData.description}
@@ -194,7 +194,7 @@ export default function BOQManager({ projectId, currencySymbol }: { projectId: s
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white w-full max-w-lg p-8 relative z-10 shadow-2xl">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-sm font-black uppercase tracking-widest text-architect-coal">Import BOQ (CSV)</h4>
-                <button onClick={() => setShowImport(false)}><X className="w-4 h-4 text-zinc-400" /></button>
+                <button onClick={() => setShowImport(false)} aria-label="Close"><X className="w-4 h-4 text-zinc-400" /></button>
               </div>
               <p className="text-[10px] text-zinc-400 font-medium mb-4">
                 One line per item: <code className="bg-zinc-50 px-1">description, unit, quantity, rate</code>. Paste directly from a spreadsheet export.

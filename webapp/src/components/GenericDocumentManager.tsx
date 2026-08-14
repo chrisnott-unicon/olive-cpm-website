@@ -158,15 +158,17 @@ export default function GenericDocumentManager({ projectId, category, user }: Ge
                  </div>
               </div>
               <div className="flex items-center gap-2">
-                 <a 
-                   href={doc.url} 
+                 <a
+                   href={doc.url}
                    download={doc.name}
+                   aria-label={`Download ${doc.name}`}
                    className="p-2 text-zinc-300 hover:text-olive-primary transition-colors"
                  >
                     <Download className="w-3.5 h-3.5" />
                  </a>
-                 <button 
+                 <button
                    onClick={() => handleDelete(doc.id)}
+                   aria-label={`Delete ${doc.name}`}
                    className="p-2 text-zinc-200 hover:text-red-500 transition-colors"
                  >
                     <Trash2 className="w-3.5 h-3.5" />

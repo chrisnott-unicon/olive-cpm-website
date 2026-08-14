@@ -330,37 +330,47 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
     } catch (err) { console.error("Approval failed", err); }
   };
 
-  const generateAndUploadPDF = (entry: any) => {
+  const buildDiaryPdf = (entry: any) => {
     const doc = new jsPDF();
-    
+
     doc.setFontSize(22);
     doc.text("Unicon Construction Site Diary", 20, 20);
-    
+
     doc.setFontSize(12);
     doc.text(`Project ID: ${selectedProject}`, 20, 35);
     doc.text(`Status: Published`, 20, 42);
     doc.text(`Recorded By: ${entry.userName}`, 20, 49);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 56);
-    
+
     doc.setFontSize(10);
     doc.text(`Location: ${entry.location?.lat}, ${entry.location?.lng}`, 20, 68);
     doc.text(`Weather: ${entry.weather?.temp}°C - ${entry.weather?.condition}`, 20, 75);
-    
+
     doc.line(20, 80, 190, 80);
-    
+
     doc.setFontSize(12);
     doc.text("Observation Summary:", 20, 90);
-    
+
     const splitText = doc.splitTextToSize(entry.note, 170);
     doc.text(splitText, 20, 100);
-    
+
+    return doc;
+  };
+
+  const generateAndUploadPDF = (entry: any) => {
+    buildDiaryPdf(entry);
     // In a real environment, we would convert to blob and upload to Drive API
     // const pdfBlob = doc.output('blob');
     console.log("PDF Created for entry:", entry.id);
     console.log("Uploading to Google Drive Folder for Project:", selectedProject);
-    
+
     // Simulate folder creation and upload alert
     // alert(`Diary for ${new Date().toLocaleDateString()} has been archived to Project's Google Drive Folder.`);
+  };
+
+  const handleViewPublishedRecord = (entry: any) => {
+    const doc = buildDiaryPdf(entry);
+    doc.save(`site-diary-${entry.id}.pdf`);
   };
 
   return (
@@ -445,7 +455,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
                    {weather ? `${weather.temp}°C ${weather.condition}` : 'Fetching WX...'}
                  </div>
                  <div className="ml-auto">
-                   <button onClick={fetchEnvironmentData} className="text-architect-coal hover:text-olive-primary transition-colors">
+                   <button onClick={fetchEnvironmentData} aria-label="Refresh location and weather" className="text-architect-coal hover:text-olive-primary transition-colors">
                      <RefreshCw className={`w-3 h-3 ${fetchingData ? 'animate-spin' : ''}`} />
                    </button>
                  </div>
@@ -487,8 +497,9 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
                         <Video className="w-6 h-6 text-white" />
                       </div>
                     )}
-                    <button 
+                    <button
                       onClick={() => setMedia(prev => prev.filter((_, i) => i !== idx))}
+                      aria-label="Remove attachment"
                       className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="w-3 h-3" />
@@ -504,6 +515,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
                 disabled={isEntryLocked}
                 className="p-3 bg-zinc-50 text-zinc-500 rounded-xl hover:bg-zinc-100 transition-all border border-zinc-100 disabled:opacity-50"
                 title="Add Photos"
+                aria-label="Add photos"
               >
                 <Camera className="w-5 h-5" />
               </button>
@@ -512,6 +524,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
                 disabled={isEntryLocked}
                 className="p-3 bg-zinc-50 text-zinc-500 rounded-xl hover:bg-zinc-100 transition-all border border-zinc-100 disabled:opacity-50"
                 title="Add Video"
+                aria-label="Add video"
               >
                 <Video className="w-5 h-5" />
               </button>
@@ -597,17 +610,18 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
                   
                   {canApprove && entry.status === 'Pending_Approval' && (
                     <div className="flex gap-2">
-                       <button 
+                       <button
                         onClick={() => handleApprove(entry)}
                         className="w-8 h-8 rounded-lg bg-olive-primary text-white flex items-center justify-center hover:bg-emerald-600 transition-all shadow-lg shadow-olive-primary/20"
                         title="Approve & Publish"
+                        aria-label="Approve and publish"
                       >
                          <Check className="w-4 h-4" />
                        </button>
                     </div>
                   )}
                   {entry.status === 'Published' && (
-                    <button className="text-zinc-300 hover:text-architect-coal transition-colors">
+                    <button onClick={() => handleViewPublishedRecord(entry)} title="Download PDF" aria-label="Download published record as PDF" className="text-zinc-300 hover:text-architect-coal transition-colors">
                        <FileText className="w-5 h-5" />
                     </button>
                   )}
