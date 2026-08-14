@@ -220,7 +220,7 @@ export default function ProjectDashboard({
                          {project.professionals.paEmail && <p className="text-[10px] text-zinc-500 font-medium">E: {project.professionals.paEmail}</p>}
                          {project.professionals.paPhone && <p className="text-[10px] text-zinc-500 font-medium">T: {project.professionals.paPhone}</p>}
                          {project.professionals.paDigitalAgreement && (
-                           <div className="mt-2 text-[7px] font-black text-emerald-600 uppercase tracking-widest">Electronic Agreement Active</div>
+                           <div className="mt-2 text-[8px] font-black text-emerald-600 uppercase tracking-widest">Electronic Agreement Active</div>
                          )}
                       </div>
                     </div>
@@ -323,7 +323,7 @@ export default function ProjectDashboard({
           </button>
           <div>
             <div className="flex items-center gap-2 md:gap-3 mb-1">
-              <span className={`px-2 py-0.5 text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] rounded-sm ${
+              <span className={`px-2 py-0.5 text-[8px] md:text-[8px] font-black uppercase tracking-[0.2em] rounded-sm ${
                 ['Construction', 'Active'].includes(project.status) ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-500'
               }`}>
                 {project.status}

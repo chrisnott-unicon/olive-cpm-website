@@ -190,7 +190,7 @@ export default function App() {
                   <GanttChartSquare className="w-8 h-8 md:w-10 md:h-10 text-olive-primary" strokeWidth={1} />
                   <div className="flex flex-col">
                     <span className="text-olive-primary font-light text-base md:text-lg tracking-[0.1em] leading-tight">OLIVE</span>
-                    <span className="text-[7px] md:text-[8px] font-black tracking-[0.2em] text-zinc-400">BY UNICON SOUTH AFRICA</span>
+                    <span className="text-[8px] md:text-[8px] font-black tracking-[0.2em] text-zinc-400">BY UNICON SOUTH AFRICA</span>
                   </div>
                 </div>
                 {/* Mobile Close Button */}
@@ -280,7 +280,7 @@ export default function App() {
                                 setActiveSubTab(tool.id);
                                 setIsSidebarOpen(false);
                               }}
-                              className={`w-full text-left pl-6 py-2 text-[7px] font-black tracking-[0.2em] uppercase transition-all ${
+                              className={`w-full text-left pl-6 py-2 text-[8px] font-black tracking-[0.2em] uppercase transition-all ${
                                 activeSubTab === tool.id ? 'text-olive-primary' : 'text-zinc-300 hover:text-zinc-500'
                               }`}
                             >

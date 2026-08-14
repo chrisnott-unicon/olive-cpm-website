@@ -745,7 +745,7 @@ export default function TaskManager({ projectId, user }: TaskManagerProps) {
                  
                  {task.dependencyIds && task.dependencyIds.length > 0 && (
                    <div className="flex flex-wrap gap-2 mt-2">
-                      <span className="text-[7px] font-black text-zinc-300 uppercase tracking-widest self-center">Predecessors:</span>
+                      <span className="text-[8px] font-black text-zinc-300 uppercase tracking-widest self-center">Predecessors:</span>
                       {task.dependencyIds.map(depId => {
                         const depTask = tasks.find(t => t.id === depId);
                         return (

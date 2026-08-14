@@ -225,7 +225,7 @@ export default function ProjectPhotos({ projectTarget, user, userData }: Project
                 <div className="translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                   <div className="flex flex-wrap gap-1 mb-4">
                     {photo.tags.slice(0, 4).map(tag => (
-                      <span key={tag} className="px-2 py-0.5 bg-white/10 backdrop-blur-md border border-white/20 text-[7px] font-black text-white uppercase tracking-widest">
+                      <span key={tag} className="px-2 py-0.5 bg-white/10 backdrop-blur-md border border-white/20 text-[8px] font-black text-white uppercase tracking-widest">
                         {tag}
                       </span>
                     ))}

@@ -194,7 +194,7 @@ export default function GanttChart({ tasks }: GanttChartProps) {
                     width 
                   }}
                 >
-                  <span className="text-[7px] font-black uppercase text-white truncate mix-blend-difference">
+                  <span className="text-[8px] font-black uppercase text-white truncate mix-blend-difference">
                     {task.title}
                   </span>
                 </motion.div>

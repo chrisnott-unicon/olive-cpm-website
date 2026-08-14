@@ -191,11 +191,11 @@ export default function DeliveryLog({ projectId }: { projectId: string }) {
               <div className="text-right flex items-center gap-8">
                  <div>
                     <p className="text-[10px] font-black text-architect-coal uppercase">{d.status}</p>
-                    <p className="text-[7px] text-zinc-300 font-black uppercase">STATUS</p>
+                    <p className="text-[8px] text-zinc-300 font-black uppercase">STATUS</p>
                  </div>
                  <div>
                     <p className="text-[10px] font-black text-architect-coal uppercase">{d.timestamp.toLocaleDateString()}</p>
-                    <p className="text-[7px] text-zinc-300 font-black uppercase">ARRIVAL</p>
+                    <p className="text-[8px] text-zinc-300 font-black uppercase">ARRIVAL</p>
                  </div>
               </div>
            </div>

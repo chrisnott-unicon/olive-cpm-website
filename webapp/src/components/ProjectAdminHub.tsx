@@ -462,7 +462,7 @@ export default function ProjectAdminHub({ projectTarget, user, userData }: Proje
                           <Trash2 className="w-4 h-4" />
                         </button>
                       ) : (
-                        <div className="px-3 py-1 bg-architect-coal text-white text-[7px] font-black uppercase tracking-widest">ADMIN</div>
+                        <div className="px-3 py-1 bg-architect-coal text-white text-[8px] font-black uppercase tracking-widest">ADMIN</div>
                       )}
                    </div>
                  ))}

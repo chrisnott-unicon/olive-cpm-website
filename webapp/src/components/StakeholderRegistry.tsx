@@ -351,25 +351,25 @@ export default function StakeholderRegistry({ projectTarget, user, userData }: S
                  {s.status === 'Pending_Verification' && (
                     <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-sm">
                        <Clock className="w-3 h-3" strokeWidth={2} />
-                       <span className="text-[7px] font-black uppercase tracking-widest">Pending</span>
+                       <span className="text-[8px] font-black uppercase tracking-widest">Pending</span>
                     </div>
                  )}
                  {s.status === 'Awaiting_Response' && (
                     <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-50 text-blue-700 border border-blue-100 rounded-sm">
                        <Mail className="w-3 h-3" strokeWidth={2} />
-                       <span className="text-[7px] font-black uppercase tracking-widest">Awaiting Link</span>
+                       <span className="text-[8px] font-black uppercase tracking-widest">Awaiting Link</span>
                     </div>
                  )}
                  {s.status === 'Invited' && (
                     <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-sm">
                        <CheckCircle2 className="w-3 h-3" strokeWidth={2} />
-                       <span className="text-[7px] font-black uppercase tracking-widest">Accepted</span>
+                       <span className="text-[8px] font-black uppercase tracking-widest">Accepted</span>
                     </div>
                  )}
                  {s.status === 'Declined' && (
                     <div className="flex items-center gap-1.5 px-2 py-1 bg-red-50 text-red-700 border border-red-100 rounded-sm">
                        <XSquare className="w-3 h-3" strokeWidth={2} />
-                       <span className="text-[7px] font-black uppercase tracking-widest">Declined</span>
+                       <span className="text-[8px] font-black uppercase tracking-widest">Declined</span>
                     </div>
                  )}
               </div>

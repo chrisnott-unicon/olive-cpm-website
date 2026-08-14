@@ -212,15 +212,15 @@ export default function WeatherLogger({ projectId, projectCoordinates }: Weather
             <div className="flex items-center gap-8 text-right">
                <div>
                   <p className="text-xs font-bold text-architect-coal">{log.temp}°C</p>
-                  <p className="text-[7px] font-black text-zinc-300 uppercase tracking-tighter">TEMP</p>
+                  <p className="text-[8px] font-black text-zinc-300 uppercase tracking-tighter">TEMP</p>
                </div>
                <div>
                   <p className="text-xs font-bold text-architect-coal">{log.windSpeed} km/h</p>
-                  <p className="text-[7px] font-black text-zinc-300 uppercase tracking-tighter">WIND</p>
+                  <p className="text-[8px] font-black text-zinc-300 uppercase tracking-tighter">WIND</p>
                </div>
                <div>
                   <p className="text-xs font-bold text-architect-coal">{log.humidity}%</p>
-                  <p className="text-[7px] font-black text-zinc-300 uppercase tracking-tighter">HUMIDITY</p>
+                  <p className="text-[8px] font-black text-zinc-300 uppercase tracking-tighter">HUMIDITY</p>
                </div>
             </div>
           </div>

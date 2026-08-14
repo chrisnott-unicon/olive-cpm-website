@@ -202,19 +202,19 @@ export default function BaselineSummary({ projectId, user }: BaselineSummaryProp
                      </div>
                      <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-0.5">
-                           <p className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">Baseline Finish</p>
+                           <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Baseline Finish</p>
                            <p className="text-[11px] font-bold text-architect-coal">{m.baselineFinish}</p>
                         </div>
                         {m.duration && (
                           <div className="space-y-0.5">
-                             <p className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">Duration</p>
+                             <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Duration</p>
                              <p className="text-[11px] font-bold text-olive-primary">{m.duration}</p>
                           </div>
                         )}
                      </div>
                      {m.dependencies && m.dependencies.length > 0 && (
                        <div className="mt-3 pt-3 border-t border-zinc-50">
-                          <p className="text-[7px] font-black text-zinc-400 uppercase tracking-widest mb-1">Predecessors</p>
+                          <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">Predecessors</p>
                           <div className="flex flex-wrap gap-1">
                              {m.dependencies.map((dep: any, di: number) => (
                                <span key={di} className="text-[8px] bg-zinc-50 text-zinc-500 px-1.5 py-0.5 rounded-sm border border-zinc-100 italic">

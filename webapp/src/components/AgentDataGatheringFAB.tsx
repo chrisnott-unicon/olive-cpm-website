@@ -34,7 +34,7 @@ export default function AgentDataGatheringFAB() {
           >
             <div className="absolute inset-0 bg-olive-primary/10 rounded-full animate-pulse" />
             <Bot className="w-5 h-5 mb-1" strokeWidth={1.5} />
-            <span className="text-[7px] font-black tracking-widest uppercase">Agent</span>
+            <span className="text-[8px] font-black tracking-widest uppercase">Agent</span>
           </button>
 
           <div className="w-px h-8 bg-zinc-700 mx-1 shrink-0" />
@@ -46,7 +46,7 @@ export default function AgentDataGatheringFAB() {
               className="flex-1 flex flex-col items-center justify-center p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
             >
               <tool.icon className="w-4 h-4 mb-1" strokeWidth={1.5} />
-              <span className="text-[7px] font-black tracking-wider uppercase">{tool.label}</span>
+              <span className="text-[8px] font-black tracking-wider uppercase">{tool.label}</span>
             </button>
           ))}
         </div>
