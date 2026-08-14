@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FolderOpen, 
   FileText, 
@@ -23,10 +23,15 @@ interface ProjectInformationHubProps {
   pinningContext?: { rfiId: string; drawingId: string } | null;
   onPinComplete?: () => void;
   onPinToDrawing?: (rfiId: string, drawingId: string) => void;
+  searchJumpSubView?: string | null;
 }
 
-export default function ProjectDocuments({ user, userData, projectTarget, initialFileRef, pinningContext, onPinComplete, onPinToDrawing }: ProjectInformationHubProps) {
+export default function ProjectDocuments({ user, userData, projectTarget, initialFileRef, pinningContext, onPinComplete, onPinToDrawing, searchJumpSubView }: ProjectInformationHubProps) {
   const [activeSubView, setActiveSubView] = useState<'drawings' | 'specs' | 'agreements' | 'contracts' | 'rfis' | 'si'>(pinningContext ? 'drawings' : 'drawings');
+
+  useEffect(() => {
+    if (searchJumpSubView) setActiveSubView(searchJumpSubView as any);
+  }, [searchJumpSubView]);
 
   const handleInnerPinToDrawing = (rfiId: string, drawingId: string) => {
     setActiveSubView('drawings');

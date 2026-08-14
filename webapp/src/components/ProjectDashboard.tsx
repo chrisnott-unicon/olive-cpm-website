@@ -19,8 +19,10 @@ import {
   Calculator,
   Camera,
   ShieldAlert,
-  Box
+  Box,
+  Search
 } from 'lucide-react';
+import ProjectQuickSearch from './ProjectQuickSearch';
 import ProjectDocuments from './ProjectDocuments';
 import SiteDiary from './SiteDiary';
 import ProjectRecords from './ProjectRecords';
@@ -55,14 +57,22 @@ export default function ProjectDashboard({
   const [weather, setWeather] = useState<any>(null);
   const [localActiveTab, setLocalActiveTab] = useState<'overview' | 'drawings' | 'records' | 'planning' | 'finance' | 'admin' | 'resources' | 'compliance'>('overview');
   const [pinningContext, setPinningContext] = useState<{ rfiId: string; drawingId: string } | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchJumpSubView, setSearchJumpSubView] = useState<string | null>(null);
 
   const handlePinToDrawing = (rfiId: string, drawingId: string) => {
     setPinningContext({ rfiId, drawingId });
     setActiveTab('drawings');
   };
-  
+
   const activeTab = (activeTabProp as any) || localActiveTab;
   const setActiveTab = onSetActiveTabProp || (setLocalActiveTab as any);
+
+  const handleSearchNavigate = (tab: string, subView?: string) => {
+    setActiveTab(tab);
+    setSearchJumpSubView(subView || null);
+    setIsSearchOpen(false);
+  };
   
   useEffect(() => {
     // Fetch historical/live weather
@@ -115,12 +125,13 @@ export default function ProjectDashboard({
             pinningContext={pinningContext}
             onPinComplete={() => setPinningContext(null)}
             onPinToDrawing={handlePinToDrawing}
+            searchJumpSubView={searchJumpSubView}
           />
         );
       case 'records':
         return <ProjectRecords user={user} userData={userData} projectTarget={project} />;
       case 'planning':
-        return <ProjectPlanningHub user={user} userData={userData} projectTarget={project} />;
+        return <ProjectPlanningHub user={user} userData={userData} projectTarget={project} searchJumpSubView={searchJumpSubView} />;
       case 'finance':
         return <Valuations user={user} userData={userData} projectTarget={project} />;
       case 'admin':
@@ -334,7 +345,25 @@ export default function ProjectDashboard({
             <h1 className="text-xl md:text-2xl font-light text-zinc-900 tracking-tight uppercase leading-none truncate max-w-[200px] sm:max-w-xs md:max-w-md lg:max-w-full">{project.name}</h1>
           </div>
         </div>
+
+        <button
+          onClick={() => setIsSearchOpen(true)}
+          aria-label="Search this project"
+          className="w-8 md:w-10 h-8 md:h-10 bg-zinc-50 flex items-center justify-center text-zinc-500 hover:text-olive-primary transition-all rounded-full hover:bg-zinc-100 shrink-0"
+        >
+          <Search className="w-3.5 md:w-4 h-3.5 md:h-4" strokeWidth={2} />
+        </button>
       </div>
+
+      <AnimatePresence>
+        {isSearchOpen && (
+          <ProjectQuickSearch
+            projectId={project.id}
+            onNavigate={handleSearchNavigate}
+            onClose={() => setIsSearchOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         <motion.div

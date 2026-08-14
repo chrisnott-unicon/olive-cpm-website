@@ -32,12 +32,17 @@ interface ProjectPlanningHubProps {
   user: any;
   userData?: any;
   projectTarget: any;
+  searchJumpSubView?: string | null;
 }
 
-export default function ProjectPlanningHub({ user, userData, projectTarget }: ProjectPlanningHubProps) {
+export default function ProjectPlanningHub({ user, userData, projectTarget, searchJumpSubView }: ProjectPlanningHubProps) {
   const [activeSubView, setActiveSubView] = useState<'schedule' | 'tasks' | 'risks' | 'baseline'>('schedule');
   const [tasks, setTasks] = useState<ProjectTask[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
+
+  useEffect(() => {
+    if (searchJumpSubView) setActiveSubView(searchJumpSubView as any);
+  }, [searchJumpSubView]);
 
   useEffect(() => {
     const q = query(collection(db, `projects/${projectTarget.id}/tasks`), orderBy('createdAt', 'asc'));
