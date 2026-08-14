@@ -151,6 +151,71 @@ project creation later.
 Every commit in this batch passed `tsc --noEmit` and a full production
 build too.
 
+## GUI/menu structure review, then chipped away while Chris was on a flight
+
+Chris asked for a review of the app's overall GUI and navigation structure
+against UI/UX best practices. Found a mix of real strengths (the 3-tier
+sidebar → project tabs → in-tool hub pattern is consistent and holds up
+well; the "Quick Tip" panel per tool is a nice touch) and 10 concrete
+problems. He then said to run all the fixes while unreachable, using my
+own judgement on anything ambiguous rather than blocking on it.
+
+**Fixed:**
+- **Navigation state loss**: re-clicking the project you're already
+  viewing from the sidebar unconditionally reset you back to Overview,
+  discarding whatever tab you were working in. Now only resets when
+  actually switching to a different project.
+- **Two different things both called "Resources"**: the sidebar's
+  people/plant/material roster and Records' daily labour-and-plant log
+  had the same name and were easy to confuse. Renamed the roster to
+  "Asset Registry" (sidebar, page header, tool description) and the
+  daily log to "Labour & Plant Log," with each one's description now
+  pointing at the other for anyone who lands in the wrong place.
+- **Unbounded Firestore listeners**: RFIs, compliance items, and
+  stakeholders had no `limit()` on their live queries — on a project
+  running for years, these would keep growing and getting slower
+  forever. Capped at 200/300/500 respectively, matching the caps
+  already in place elsewhere in the app.
+- **~45 icon-only buttons with no accessible name** across ~20 files —
+  close/delete/remove/zoom/toggle controls that relied on hover-only
+  `title` tooltips, invisible to screen readers and touch users. All
+  now carry `aria-label`s, many naming the specific entity ("Remove
+  Jane Doe," not just "Remove").
+- **Two buttons that looked functional but silently did nothing**,
+  found while fixing the above: StakeholderMindMap's zoom in/out/reset
+  buttons now actually drive the d3 zoom instead of being inert, and
+  SiteDiary's download-PDF button now regenerates and saves the real
+  PDF instead of only building one as a side effect of a different
+  (also-silent) action.
+- **Buttons with no backing functionality at all** (RFIManager's
+  overflow menu and query-edit, Settings' notification toggle and
+  regional-format select, ProjectBaselineRecords' and Valuations'
+  download buttons) are now disabled and labeled "not yet implemented"
+  instead of left clickable with no effect — honest about what's not
+  built yet rather than pretending.
+- **Settings had a dead, unrendered `theme` state** left over from an
+  earlier build — removed. The actual non-functional controls in that
+  panel were the notification toggle and regional-format select
+  (different bug than originally suspected — corrected course rather
+  than fixing the wrong thing).
+- **The smallest UI text** (`text-[7px]`, below what's legible on a
+  typical phone) bumped to 8px at its most extreme instances.
+- **A project-scoped quick search**: a search icon in the sticky
+  project header now searches across that project's documents, RFIs,
+  site instructions, compliance items, stakeholders, and tasks, with
+  click-to-jump straight to the right tool tab (and, for
+  Documents/Planning, the right internal sub-view). Deliberately a
+  per-project in-memory filter, not cross-project or full-text — that
+  would need a real search backend (e.g. Algolia) if wanted later.
+
+**Deliberately not built**, since they're product/design decisions, not
+bugs — flagged rather than guessed at:
+- Full dark mode.
+- Logo/white-label branding for the "OLIVE" sidebar mark.
+
+Every commit in this batch passed `tsc --noEmit` and a full production
+build.
+
 ## Still outstanding — lower priority, not blocking
 
 - 8 remaining dependency advisories, all transitive (`websocket-driver`
