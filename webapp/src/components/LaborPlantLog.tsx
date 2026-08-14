@@ -11,7 +11,7 @@ import {
   Construction,
   Hammer
 } from 'lucide-react';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { 
   collection, 
   query, 
@@ -59,6 +59,8 @@ export default function LaborPlantLog({ projectId, user }: { projectId: string; 
     );
     return onSnapshot(q, (snapshot) => {
       setRecords(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LaborPlantRecord)));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectId}/labor_plant_logs`);
     });
   }, [projectId]);
 
@@ -80,7 +82,7 @@ export default function LaborPlantLog({ projectId, user }: { projectId: string; 
       setNewLabor([]);
       setNewPlant([]);
     } catch (e) {
-       console.error(e);
+       handleFirestoreError(e, OperationType.CREATE, `projects/${projectId}/labor_plant_logs`);
     } finally {
       setIsSubmitting(false);
     }

@@ -78,21 +78,31 @@ export default function DocumentManager({ user, userData, projectTarget, initial
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64data = reader.result as string;
-        
-        // Store reference in Firestore
-        await addDoc(collection(db, 'projects', projectTarget.id, 'documents'), {
-          name: file.name,
-          mimeType: file.type,
-          data: base64data, // Consistent with PDFAnnotator's expectation of fileUrl
-          size: file.size,
-          category: file.type.includes('pdf') ? 'Drawing' : 'Other',
-          version: '1',
-          uploadedBy: user.uid,
-          createdAt: serverTimestamp()
-        });
-        
-        setUploading(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+
+        // The outer try/catch only wraps this synchronous setup — it never
+        // covered this async callback's own addDoc rejection, which left
+        // "uploading" stuck true forever on any Firestore rejection (e.g.
+        // a rules validation failure) with no error shown.
+        try {
+          await addDoc(collection(db, 'projects', projectTarget.id, 'documents'), {
+            name: file.name,
+            mimeType: file.type,
+            data: base64data, // Consistent with PDFAnnotator's expectation of fileUrl
+            size: file.size,
+            category: file.type.includes('pdf') ? 'Drawing' : 'Other',
+            version: '1',
+            uploadedBy: user.uid,
+            createdAt: serverTimestamp()
+          });
+        } catch (err: any) {
+          try {
+            handleFirestoreError(err, OperationType.CREATE, `projects/${projectTarget.id}/documents`);
+          } catch (_) { /* already logged/toasted by handleFirestoreError */ }
+          setError(`Storage protocol failure: ${err.message || 'Unknown network error'}`);
+        } finally {
+          setUploading(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }
       };
       reader.onerror = () => {
         setError("Failed to read file.");
@@ -100,7 +110,9 @@ export default function DocumentManager({ user, userData, projectTarget, initial
       };
       reader.readAsDataURL(file);
     } catch (err: any) {
-      console.error("Upload error:", err);
+      try {
+        handleFirestoreError(err, OperationType.CREATE, `projects/${projectTarget.id}/documents`);
+      } catch (_) { /* already logged/toasted by handleFirestoreError */ }
       setError(`Storage protocol failure: ${err.message || 'Unknown network error'}`);
       setUploading(false);
     }

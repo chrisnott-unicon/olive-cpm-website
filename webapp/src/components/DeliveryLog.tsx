@@ -12,7 +12,7 @@ import {
   ClipboardCheck,
   Search
 } from 'lucide-react';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { 
   collection, 
   query, 
@@ -53,11 +53,13 @@ export default function DeliveryLog({ projectId }: { projectId: string }) {
       limit(50)
     );
     return onSnapshot(q, (snapshot) => {
-      setDeliveries(snapshot.docs.map(doc => ({ 
-        id: doc.id, 
+      setDeliveries(snapshot.docs.map(doc => ({
+        id: doc.id,
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate() || new Date()
       } as MaterialDelivery)));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectId}/material_deliveries`);
     });
   }, [projectId]);
 
@@ -78,7 +80,7 @@ export default function DeliveryLog({ projectId }: { projectId: string }) {
         status: 'Accepted'
       });
     } catch (e) {
-      console.error(e);
+      handleFirestoreError(e, OperationType.CREATE, `projects/${projectId}/material_deliveries`);
     } finally {
       setIsSubmitting(false);
     }
