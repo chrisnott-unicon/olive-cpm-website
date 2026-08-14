@@ -6,11 +6,10 @@ import {
   onSnapshot, 
   addDoc, 
   serverTimestamp, 
-  updateDoc, 
-  doc,
-  getDocs
+  updateDoc,
+  doc
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType, getNextSequenceNumber } from '../lib/firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   FileText, 
@@ -88,8 +87,7 @@ export default function SiteInstructionManager({ user, projectTarget, stakeholde
     if (!projectTarget?.id || !newSI.title || !newSI.description) return;
 
     try {
-      const siSnap = await getDocs(collection(db, 'projects', projectTarget.id, 'site_instructions'));
-      const siCount = siSnap.docs.length + 1;
+      const siCount = await getNextSequenceNumber(projectTarget.id, 'si');
       const siNumber = `SI-${String(siCount).padStart(3, '0')}`;
       
       const siData = {

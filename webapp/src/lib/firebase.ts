@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getFirestore, doc, getDocFromServer, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, runTransaction } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { toast } from 'sonner';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -82,6 +82,22 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   toast.error(toUserMessage(error, operationType));
   throw new Error(JSON.stringify(errInfo));
+}
+
+// Atomic per-project sequence numbers (RFI-001, SI-001, ...). Replaces the
+// old `existingDocs.length + 1` pattern, which reads-then-writes with no
+// isolation — two people creating an RFI/SI within the same moment could
+// both compute the same count and end up with two documents sharing one
+// contractual reference number. A transaction against a dedicated counter
+// doc makes the increment atomic regardless of concurrent callers.
+export async function getNextSequenceNumber(projectId: string, counterName: string): Promise<number> {
+  const counterRef = doc(db, `projects/${projectId}/counters`, counterName);
+  return runTransaction(db, async (transaction) => {
+    const snap = await transaction.get(counterRef);
+    const next = (snap.exists() ? (snap.data().value as number) : 0) + 1;
+    transaction.set(counterRef, { value: next }, { merge: true });
+    return next;
+  });
 }
 
 async function testConnection() {

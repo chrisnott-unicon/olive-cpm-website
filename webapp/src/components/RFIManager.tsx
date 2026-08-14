@@ -12,7 +12,7 @@ import {
   getDocs,
   arrayUnion
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType, getNextSequenceNumber } from '../lib/firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   MessageSquare, 
@@ -110,7 +110,7 @@ export default function RFIManager({ user, projectTarget, stakeholders = [], onP
     if (!projectTarget?.id || !newRfi.title || !newRfi.query) return;
 
     try {
-      const rfiCount = rfis.length + 1;
+      const rfiCount = await getNextSequenceNumber(projectTarget.id, 'rfi');
       const rfiNumber = `RFI-${String(rfiCount).padStart(3, '0')}`;
       
       const rfiData = {
@@ -147,8 +147,7 @@ export default function RFIManager({ user, projectTarget, stakeholders = [], onP
     try {
       let siteInstructionId = '';
       if (responseType === 'SiteInstruction') {
-        const siSnap = await getDocs(collection(db, 'projects', projectTarget.id, 'site_instructions'));
-        const siCount = siSnap.docs.length + 1;
+        const siCount = await getNextSequenceNumber(projectTarget.id, 'si');
         const siNumber = `SI-${String(siCount).padStart(3, '0')}`;
 
         const siData = {
