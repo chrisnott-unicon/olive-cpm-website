@@ -141,8 +141,14 @@ export default function LaborPlantLog({ projectId, user }: { projectId: string; 
                          className="w-16 bg-white border border-zinc-200 p-2 text-[10px] font-bold"
                          value={row.count}
                          onChange={e => {
+                           // parseInt('') / parseInt of a partial entry is
+                           // NaN, which would otherwise get persisted into a
+                           // statutory labour count record with no
+                           // validation catching it (isValidResource in
+                           // firestore.rules doesn't constrain this field).
+                           const parsed = parseInt(e.target.value, 10);
                            const next = [...newLabor];
-                           next[i].count = parseInt(e.target.value);
+                           next[i].count = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
                            setNewLabor(next);
                          }}
                        />

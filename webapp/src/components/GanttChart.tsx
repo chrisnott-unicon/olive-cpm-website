@@ -24,10 +24,16 @@ export default function GanttChart({ tasks }: GanttChartProps) {
     max.setDate(max.getDate() + 30); // Default 30 days window if no tasks
 
     if (tasks.length > 0) {
+      // An unparseable (but non-empty) date string yields `Invalid Date`,
+      // which is truthy and passes a plain filter(Boolean) — its .getTime()
+      // is NaN, which then poisons the Math.min/max below and corrupts the
+      // whole chart's date range. Guard on validity explicitly, not just
+      // presence.
+      const isValidDate = (d: Date | null): d is Date => d !== null && !isNaN(d.getTime());
       const dates = tasks.flatMap(t => [
         t.startDate ? new Date(t.startDate) : null,
         t.dueDate ? new Date(t.dueDate) : null
-      ]).filter(Boolean) as Date[];
+      ]).filter(isValidDate);
 
       if (dates.length > 0) {
         min = new Date(Math.min(...dates.map(d => d.getTime())));
