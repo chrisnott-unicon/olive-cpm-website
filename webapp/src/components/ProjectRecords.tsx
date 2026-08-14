@@ -30,7 +30,7 @@ export default function ProjectRecords({ user, userData, projectTarget }: Projec
   const subViews = [
     { id: 'diary', label: 'SITE DIARY', icon: ClipboardList, description: 'Daily site progress and event records' },
     { id: 'weather', label: 'WEATHER LOG', icon: CloudSun, description: 'Daily atmospheric records for claim support' },
-    { id: 'resources', label: 'LABOUR & PLANT', icon: Users, description: 'Site resources and equipment tracking' },
+    { id: 'resources', label: 'LABOUR & PLANT LOG', icon: Users, description: 'Daily headcount and plant/equipment hours (see the Asset Registry tab for the roster itself)' },
     { id: 'supply', label: 'MATERIAL DELIVERIES', icon: Truck, description: 'Material delivery verification and records' },
     { id: 'photos', label: 'PROGRESS PHOTOS', icon: Camera, description: 'Visual evidence and progress archive' },
   ];

@@ -97,7 +97,7 @@ export default function ProjectDashboard({
     planning: { title: 'Programme Planning', desc: 'Track your master schedule, timeline, and task matrix.', tip: 'Keep the Baseline Programme updated to avoid penalties. Accurate planning helps contractors finish on time.' },
     finance: { title: 'Professional Payment Certification', desc: 'Manage interim valuations, payment certificates, and budgets.', tip: 'Certify payments accurately and on time according to JBCC/GCC/NEC timeframes to keep cash flow healthy.' },
     admin: { title: 'Project Admin', desc: 'Access settings and platform permissions.', tip: 'Only give access to required team members. Archive the file when the defects liability period has ended.' },
-    resources: { title: 'Resource Hub', desc: 'Log materials, equipment, and supply chain tracking.', tip: 'Track when critical materials arrive to ensure they align with your Baseline Programme.' },
+    resources: { title: 'Asset Registry', desc: 'The roster of people, plant, and material stock assigned to this project — not daily logs (see Records for those).', tip: 'Track when critical materials arrive to ensure they align with your Baseline Programme.' },
     compliance: { title: 'Compliance & Certification', desc: 'Health & Safety, environmental audits, and quality standards.', tip: 'Record statutory safety audits here to ensure the Principal Contractor follows local site rules.' },
   };
 

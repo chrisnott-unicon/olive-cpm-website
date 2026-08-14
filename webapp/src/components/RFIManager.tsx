@@ -10,7 +10,8 @@ import {
   doc, 
   where,
   getDocs,
-  arrayUnion
+  arrayUnion,
+  limit
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType, getNextSequenceNumber } from '../lib/firebase';
 import { motion, AnimatePresence } from 'motion/react';
@@ -81,9 +82,14 @@ export default function RFIManager({ user, userData, projectTarget, stakeholders
     if (!projectTarget?.id) return;
 
     setLoading(true);
+    // Capped like every other list query in this codebase (site diaries,
+    // material deliveries, labour/plant logs) — an unbounded listener on a
+    // years-long project's full RFI history would only get slower over time
+    // with no benefit, since this is the working list, not an archive view.
     const q = query(
       collection(db, 'projects', projectTarget.id, 'rfis'),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(200)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {

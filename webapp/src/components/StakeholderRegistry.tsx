@@ -23,15 +23,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import StakeholderMindMap from './StakeholderMindMap';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { 
-  collection, 
-  query, 
-  onSnapshot, 
-  addDoc, 
-  updateDoc, 
-  doc, 
+import {
+  collection,
+  query,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  doc,
   serverTimestamp,
-  deleteDoc
+  deleteDoc,
+  limit
 } from 'firebase/firestore';
 
 interface Stakeholder {
@@ -94,7 +95,10 @@ export default function StakeholderRegistry({ projectTarget, user, userData }: S
   useEffect(() => {
     if (!projectTarget?.id) return;
 
-    const q = query(collection(db, `projects/${projectTarget.id}/stakeholders`));
+    // No realistic project has anywhere near this many stakeholders — this
+    // is just a safety cap, consistent with every other list query in the
+    // app being bounded rather than unconstrained.
+    const q = query(collection(db, `projects/${projectTarget.id}/stakeholders`), limit(500));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Stakeholder));
       setStakeholders(list);

@@ -49,7 +49,7 @@ export default function ProjectResourceHub({ projectTarget, user, userData }: Pr
              <div className="w-8 h-1 bg-olive-primary rounded-full" />
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Logistics & Deployment</span>
            </div>
-           <h1 className="text-4xl font-black text-architect-coal tracking-tight uppercase">Resource Hub</h1>
+           <h1 className="text-4xl font-black text-architect-coal tracking-tight uppercase">Asset Registry</h1>
         </div>
         <div className="flex items-center gap-4">
            <button 

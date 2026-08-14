@@ -231,8 +231,15 @@ export default function App() {
                     <button
                       onClick={() => {
                         setActiveTab('dashboard');
+                        // Only jump back to Overview when switching to a
+                        // genuinely different project — re-clicking the
+                        // project you're already viewing (e.g. from a
+                        // reopened mobile sidebar) used to unconditionally
+                        // discard whatever sub-tab you were on.
+                        if (selectedProjectId !== project.id) {
+                          setActiveSubTab('overview');
+                        }
                         setSelectedProjectId(project.id);
-                        setActiveSubTab('overview');
                         setIsSidebarOpen(false);
                       }}
                       className={`w-full text-left pl-14 pr-4 py-3 text-[9px] font-black tracking-[0.1em] uppercase transition-all border-l-2 ${
@@ -259,7 +266,11 @@ export default function App() {
                             { id: 'planning', label: 'PLANNING', policyKey: 'enablePlanning' },
                             { id: 'compliance', label: 'COMPLIANCE', policyKey: 'enableCompliance' },
                             { id: 'records', label: 'RECORDS', policyKey: 'enableRecords' },
-                            { id: 'resources', label: 'RESOURCES', policyKey: 'enableResources' },
+                            // Labeled distinctly from Records' "Labour &
+                            // Plant Log" sub-view — this is the static
+                            // roster/inventory registry (people, plant,
+                            // materials with QR codes), not a daily log.
+                            { id: 'resources', label: 'ASSET REGISTRY', policyKey: 'enableResources' },
                             { id: 'finance', label: 'FINANCE', policyKey: 'enableFinance' },
                             ...(userData?.role === 'Super_Admin' || userData?.role === 'Org_Admin' ? [{ id: 'admin', label: 'ADMIN', alwaysShow: true }] : []),
                           ].filter(tool => tool.alwaysShow || project.policies?.[tool.policyKey!] !== false).map(tool => (
