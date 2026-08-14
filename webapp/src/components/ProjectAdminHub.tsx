@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, updateDoc, doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { collection, query, where, getDocs, updateDoc, doc, getDoc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { ShieldAlert, Users, Settings as SettingsIcon, Save, Lock, UserPlus, Trash2, Key, UsersIcon, FileArchive, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SkeletalFrame } from './ArchitecturalDoodles';
@@ -61,26 +61,42 @@ export default function ProjectAdminHub({ projectTarget, user, userData }: Proje
         ...projectDetails
       });
     } catch (error) {
-      console.error("Error saving project details:", error);
+      handleFirestoreError(error, OperationType.UPDATE, `projects/${projectTarget.id}`);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const usersSnap = await getDocs(collection(db, 'users'));
+        // Super_Admin can see everyone; an Org_Admin should only ever see
+        // (and be able to grant project access to) people in their own
+        // org — an unfiltered read here previously leaked every other
+        // tenant's user names/emails into the "assign personnel" list.
+        // (firestore.rules' `list` rule now rejects an unconstrained query
+        // like this for non-Super_Admins outright, so this was also
+        // silently broken for Org_Admins, not just a leak for them.)
+        const usersQuery = userData?.role === 'Super_Admin'
+          ? collection(db, 'users')
+          : query(collection(db, 'users'), where('orgId', '==', userData?.orgId));
+        const usersSnap = await getDocs(usersQuery);
         const usersData = usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as UserProfile));
         setAllUsers(usersData);
         setProjectUsers(usersData.filter(u => u.allowedProjects?.includes(projectTarget.id) || u.role === 'Super_Admin'));
       } catch (error) {
-        console.error("Error fetching users:", error);
+        // handleFirestoreError re-throws after logging/toasting — catch that
+        // too, otherwise it skips setLoading(false) below and the panel
+        // stays stuck on its loading state after any rejection.
+        try {
+          handleFirestoreError(error, OperationType.LIST, 'users');
+        } catch (_) { /* already logged/toasted */ }
       }
       setLoading(false);
     };
     fetchData();
-  }, [projectTarget.id]);
+  }, [projectTarget.id, userData]);
 
   const savePolicies = async () => {
     setSaving(true);
@@ -90,9 +106,10 @@ export default function ProjectAdminHub({ projectTarget, user, userData }: Proje
       });
       // Optionally notify user
     } catch (error) {
-      console.error("Error saving policies:", error);
+      handleFirestoreError(error, OperationType.UPDATE, `projects/${projectTarget.id}`);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const toggleUserAccess = async (userId: string, hasAccess: boolean) => {
@@ -121,7 +138,7 @@ export default function ProjectAdminHub({ projectTarget, user, userData }: Proje
         });
       }
     } catch (error) {
-      console.error("Error toggling user access:", error);
+      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}`);
     }
   };
 
@@ -254,9 +271,10 @@ export default function ProjectAdminHub({ projectTarget, user, userData }: Proje
                   await updateDoc(doc(db, 'projects', projectTarget.id), { isArchived: !projectTarget.isArchived });
                   window.location.reload();
                 } catch (error) {
-                  console.error("Error archiving project:", error);
+                  handleFirestoreError(error, OperationType.UPDATE, `projects/${projectTarget.id}`);
+                } finally {
+                  setSaving(false);
                 }
-                setSaving(false);
               }
             }}
             disabled={saving}
