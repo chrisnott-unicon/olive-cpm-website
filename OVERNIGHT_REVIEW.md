@@ -2,20 +2,10 @@
 
 Branch: `claude/olive-cpm-app-copy` on `chrisnott-unicon/olive-cpm-website`
 Source: a working copy of `chrisnott-unicon/Olive-CPM-by-Unicon` (commit
-`a630bff`), copied into `webapp/` here because I don't yet have push
-access to that repo directly (see **Blocked** below).
-
-## Why this branch exists
-
-I couldn't get push access to `Olive-CPM-by-Unicon` approved overnight —
-attaching push access to a repo outside this session's original scope
-requires a permission dialog that wasn't resolving, and creating a fresh
-GitHub repo of my own failed outright (403, the GitHub App I'm using has
-no repo-creation permission at all). `olive-cpm-website` is a repo I
-already had full push access to, so that's where the working copy and all
-of tonight's fixes live. **This needs to be reconciled with the real
-`Olive-CPM-by-Unicon` repo before it's the actual source of truth** — see
-"What to do next."
+`a630bff`), copied into `webapp/` here because push access to that repo
+wasn't available overnight. Per Chris: `Olive-CPM-by-Unicon` is being made
+private and this location (`olive-cpm-website/webapp/`) is now the actual
+home going forward — no reconciliation needed.
 
 ## Five review passes, one codebase
 
@@ -84,23 +74,38 @@ deploys automatically — it needs the one-time GCP setup in `DEPLOY.md`
 Every commit passed `tsc --noEmit` and a full production build before
 being made — I didn't just edit and hope.
 
-## Not fixed — needs your call
+## Fixed this morning, after Chris's answers on the open decisions
 
-- **Valuations.tsx generates fake payment certificates.** The BOQ/progress
-  figures are hardcoded placeholder data, not read from the project's
-  real BOQ, and the UI labels a Draft as "CERTIFIED PORTION." This is a
-  document meant to carry contractual weight — I didn't wire up real
-  data blind without knowing what the actual BOQ import flow should look
-  like. Needs a product decision, not just a code fix.
-- **RFI/Site Instruction numbering can collide** — two people creating one
-  at nearly the same moment can get the same number (client-side
-  read-count-then-write, no transaction). Fixable, but I prioritized
-  the security holes first.
-- **`isValidProject`/`isValidUser` still don't reject unexpected fields**
-  (`hasOnly`) — `CreateProjectModal.tsx` writes several fields not in
-  the documented schema, and locking the rule down without seeing every
-  real write path risked breaking project creation. Needs the schema
-  and the client reconciled together.
+- **Real Bill of Quantities.** Added `BOQManager.tsx` (manual entry + a
+  plain-text CSV paste, no new dependency) writing to `/projects/{id}/boq`,
+  with a per-item progress slider. `Valuations.tsx` now computes
+  gross/retention/net from real BOQ totals × real progress instead of
+  three hardcoded line items, pulls recent site diary entries for the AI
+  analysis context, snapshots exact per-item progress into `progressData`
+  on each valuation, and labels certificates by actual status
+  (Draft/Submitted/Approved) instead of always saying "CERTIFIED."
+  Submit/Approve buttons now expose the lifecycle the rules already
+  supported but the UI never surfaced.
+- **RFI/Site Instruction numbering race fixed** — `getNextSequenceNumber()`
+  in `firebase.ts` increments a per-project counter inside a Firestore
+  transaction, so two people creating one at the same moment can no
+  longer end up with the same reference number.
+- **Dependencies patched**: `pdfjs-dist` 5→6 (real CVE, arbitrary JS
+  execution from a malicious PDF — relevant since this app takes
+  user-uploaded PDFs; the major bump changed `getDocument()`'s API
+  shape, fixed both call sites and confirmed clean build), `vite` to
+  6.4.3 (dev-server-only advisory), and removed the unused `nodemailer`
+  dependency plus its dead SMTP config in `.env.example` (verified
+  zero real usage first).
+
+**Left as-is, by choice**: `isValidProject`/`isValidUser` still don't
+reject unexpected fields (`hasOnly`) — `CreateProjectModal.tsx` writes
+several fields not in the documented schema, and Chris confirmed those
+are still evolving, so locking the rule down now would risk breaking
+project creation later.
+
+## Still outstanding — lower priority, not blocking
+
 - Several `onSnapshot` listeners across the app have no error callback,
   so a permission-denied failure just stops the listener silently
   (found in Dashboard, ProjectPlanningHub, ProjectResourceHub,
@@ -109,23 +114,20 @@ being made — I didn't just edit and hope.
 - A few UI buttons let users attempt actions the rules will reject
   (some RFI/Site-Instruction transition buttons show for people not
   authorized to use them) — the data is safe, but the UX is misleading.
-- Dependency audit flagged real advisories worth a look: `pdfjs-dist`
-  (arbitrary JS execution opening a malicious PDF — directly relevant
-  since this app loads user-uploaded PDFs), plus `vite`, `nodemailer`
-  (looks unused — candidate for removal), and a transitive
-  `websocket-driver` critical via the `firebase` package's Realtime
-  Database bits (not used by this app, so low real exposure).
+- 8 remaining dependency advisories, all transitive (`websocket-driver`
+  via firebase's unused Realtime Database bits, `form-data`, `postcss`,
+  `nanoid`, `ws`, gRPC/Firestore client libs) — lower urgency than the
+  three already patched.
+- A few components still bypass the centralized `handleFirestoreError`
+  toast with their own bare `console.error` (Valuations.tsx's remaining
+  edge cases, DeliveryLog.tsx, LaborPlantLog.tsx, DocumentManager.tsx's
+  unhandled-rejection path).
 
 ## What to do next
 
-1. **Decide how to reconcile this with `Olive-CPM-by-Unicon`.** Either
-   grant this session (or a fresh one) push access to that repo and I'll
-   port these commits over properly, or treat `olive-cpm-website`'s
-   `webapp/` as the new home going forward and archive the AI Studio
-   repo. Your call — I didn't want to guess on repo structure.
-2. **Review the branch**: `claude/olive-cpm-app-copy` on
+1. **Review the branch**: `claude/olive-cpm-app-copy` on
    `chrisnott-unicon/olive-cpm-website`. Nothing has been merged to
    `main` — it's sitting there for you to look at first.
-3. If it looks good, either merge it or tell me to open a PR.
-4. Do the GCP setup in `webapp/DEPLOY.md` if/when you want this actually
+2. If it looks good, either merge it or tell me to open a PR.
+3. Do the GCP setup in `webapp/DEPLOY.md` if/when you want this actually
    deployed.
