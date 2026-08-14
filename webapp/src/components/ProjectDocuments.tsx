@@ -108,8 +108,8 @@ export default function ProjectDocuments({ user, userData, projectTarget, initia
                     onPinComplete={onPinComplete}
                  />
                )}
-               {activeSubView === 'rfis' && <RFIManager user={user} projectTarget={projectTarget} stakeholders={projectTarget.stakeholders || []} onPinToDrawing={handleInnerPinToDrawing} />}
-               {activeSubView === 'si' && <SiteInstructionManager user={user} projectTarget={projectTarget} stakeholders={projectTarget.stakeholders || []} />}
+               {activeSubView === 'rfis' && <RFIManager user={user} userData={userData} projectTarget={projectTarget} stakeholders={projectTarget.stakeholders || []} onPinToDrawing={handleInnerPinToDrawing} />}
+               {activeSubView === 'si' && <SiteInstructionManager user={user} userData={userData} projectTarget={projectTarget} stakeholders={projectTarget.stakeholders || []} />}
                {activeSubView === 'specs' && <GenericDocumentManager projectId={projectTarget.id} category="Specification" user={user} />}
                {activeSubView === 'agreements' && <GenericDocumentManager projectId={projectTarget.id} category="Agreement" user={user} />}
                {activeSubView === 'contracts' && <GenericDocumentManager projectId={projectTarget.id} category="Contract" user={user} />}

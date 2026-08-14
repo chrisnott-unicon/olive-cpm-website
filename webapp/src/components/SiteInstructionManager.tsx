@@ -29,11 +29,13 @@ import {
 
 interface SiteInstructionManagerProps {
   user: any;
+  userData?: any;
   projectTarget: any;
   stakeholders?: any[];
 }
 
-export default function SiteInstructionManager({ user, projectTarget, stakeholders = [] }: SiteInstructionManagerProps) {
+export default function SiteInstructionManager({ user, userData, projectTarget, stakeholders = [] }: SiteInstructionManagerProps) {
+  const isAdmin = userData?.role === 'Super_Admin' || userData?.role === 'Org_Admin';
   const currentUserStakeholder = stakeholders.find(s => s.id === user.uid);
   const isPA = currentUserStakeholder?.role?.toLowerCase().includes('agent') || 
                currentUserStakeholder?.role?.toLowerCase().includes('engineer') || 
@@ -337,8 +339,11 @@ export default function SiteInstructionManager({ user, projectTarget, stakeholde
                     </button>
                   )}
                   
-                  {activeSI.status === 'Acknowledged' && (
-                    <button 
+                  {/* Per firestore.rules: the addressed party can report
+                      their own work complete, and the issuer/admin can also
+                      close it out — anyone else's click would silently fail. */}
+                  {activeSI.status === 'Acknowledged' && (isAdmin || user.uid === activeSI.issuedById || user.uid === activeSI.issuedToId) && (
+                    <button
                       onClick={() => handleUpdateStatus(activeSI.id, 'Completed')}
                       className="px-6 py-3 bg-architect-coal text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-olive-primary transition-all flex items-center gap-2"
                     >

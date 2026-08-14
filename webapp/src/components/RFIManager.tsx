@@ -36,6 +36,7 @@ import {
 
 interface RFIManagerProps {
   user: any;
+  userData?: any;
   projectTarget: any;
   stakeholders?: any[];
   onPinToDrawing?: (rfiId: string, drawingId: string) => void;
@@ -50,7 +51,7 @@ enum RFIStatus {
   Closed = 'Closed'
 }
 
-export default function RFIManager({ user, projectTarget, stakeholders = [], onPinToDrawing }: RFIManagerProps) {
+export default function RFIManager({ user, userData, projectTarget, stakeholders = [], onPinToDrawing }: RFIManagerProps) {
   const [rfis, setRfis] = useState<any[]>([]);
   const [activeRfiId, setActiveRfiId] = useState<string | null>(null);
   const activeRfi = rfis.find(r => r.id === activeRfiId) || null;
@@ -72,6 +73,7 @@ export default function RFIManager({ user, projectTarget, stakeholders = [], onP
   const currentUserStakeholder = stakeholders.find(s => s.id === user.uid);
   const isContractor = currentUserStakeholder?.role?.toLowerCase().includes('contractor');
   const isPA = currentUserStakeholder?.role?.toLowerCase().includes('agent') || currentUserStakeholder?.role?.toLowerCase().includes('engineer');
+  const isAdmin = userData?.role === 'Super_Admin' || userData?.role === 'Org_Admin';
   const [responseType, setResponseType] = useState<'Clarification' | 'SiteInstruction'>('Clarification');
   const [isResponding, setIsResponding] = useState(false);
 
@@ -576,17 +578,23 @@ export default function RFIManager({ user, projectTarget, stakeholders = [], onP
               {/* Action Footer */}
               <div className="p-8 bg-zinc-50/50 border-t border-zinc-100">
                 <div className="flex flex-wrap gap-4">
-                  {activeRfi.status === RFIStatus.Draft && (
-                    <button 
+                  {/* firestore.rules only lets the creator (or an admin) move
+                      Draft -> Internal_Review — show the button only to them,
+                      instead of letting anyone click it into a silent
+                      permission-denied. */}
+                  {activeRfi.status === RFIStatus.Draft && (isAdmin || user.uid === activeRfi.creatorId) && (
+                    <button
                       onClick={() => handleUpdateStatus(activeRfi.id, RFIStatus.Internal_Review)}
                       className="px-6 py-3 bg-architect-coal text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-olive-primary transition-all"
                     >
                       Issue to Internal QC
                     </button>
                   )}
-                  
-                  {activeRfi.status === RFIStatus.Internal_Review && (
-                    <button 
+
+                  {/* Only the assigned internal checker (or an admin) may
+                      publish it onward per the rules. */}
+                  {activeRfi.status === RFIStatus.Internal_Review && (isAdmin || user.uid === activeRfi.internalCheckerId) && (
+                    <button
                       onClick={() => handleUpdateStatus(activeRfi.id, RFIStatus.Published_Open)}
                       className="px-6 py-3 bg-architect-coal text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-olive-primary transition-all"
                     >
@@ -600,12 +608,15 @@ export default function RFIManager({ user, projectTarget, stakeholders = [], onP
                          <CheckCircle2 className="w-5 h-5 text-olive-primary" />
                          <span className="text-[10px] font-black uppercase text-white tracking-widest">Protocol Finalized (Closed)</span>
                        </div>
-                       <button 
-                         onClick={() => handleUpdateStatus(activeRfi.id, RFIStatus.Published_Open)}
-                         className="text-[9px] font-black uppercase text-zinc-400 hover:text-white"
-                       >
-                         Re-Open for Further Query
-                       </button>
+                       {/* Re-opening a closed RFI is admin-only per the rules. */}
+                       {isAdmin && (
+                         <button
+                           onClick={() => handleUpdateStatus(activeRfi.id, RFIStatus.Published_Open)}
+                           className="text-[9px] font-black uppercase text-zinc-400 hover:text-white"
+                         >
+                           Re-Open for Further Query
+                         </button>
+                       )}
                     </div>
                   )}
                 </div>
