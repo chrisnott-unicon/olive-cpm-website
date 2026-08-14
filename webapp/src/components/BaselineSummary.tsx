@@ -67,7 +67,7 @@ export default function BaselineSummary({ projectId, user }: BaselineSummaryProp
       const reader = new FileReader();
       reader.onload = async (event) => {
         const typedArray = new Uint8Array(event.target?.result as ArrayBuffer);
-        const pdf = await pdfjs.getDocument(typedArray).promise;
+        const pdf = await pdfjs.getDocument({ data: typedArray }).promise;
         let fullText = "";
         
         for (let i = 1; i <= pdf.numPages; i++) {

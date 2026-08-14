@@ -74,7 +74,7 @@ export default function PDFAnnotator({ fileUrl, fileName, documentId, revision, 
   useEffect(() => {
     const loadPDF = async () => {
       try {
-        const loadingTask = pdfjsLib.getDocument(fileUrl);
+        const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
         const doc = await loadingTask.promise;
         setPdfDoc(doc);
         renderPage(doc, pageNum);
