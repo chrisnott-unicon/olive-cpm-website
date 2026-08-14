@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import TaskManager from './TaskManager';
 import BaselineSummary from './BaselineSummary';
 import GanttChart from './GanttChart';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 
 interface ProjectTask {
@@ -43,6 +43,9 @@ export default function ProjectPlanningHub({ user, userData, projectTarget }: Pr
     const q = query(collection(db, `projects/${projectTarget.id}/tasks`), orderBy('createdAt', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setTasks(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProjectTask)));
+      setLoadingTasks(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectTarget.id}/tasks`);
       setLoadingTasks(false);
     });
     return unsubscribe;

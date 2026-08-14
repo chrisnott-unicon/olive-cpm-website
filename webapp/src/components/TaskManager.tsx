@@ -17,7 +17,7 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { 
   collection, 
   query, 
@@ -80,6 +80,9 @@ export default function TaskManager({ projectId, user }: TaskManagerProps) {
     const q = query(collection(db, `projects/${projectId}/tasks`), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setTasks(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProjectTask)));
+      setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectId}/tasks`);
       setLoading(false);
     });
     return unsubscribe;

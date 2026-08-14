@@ -64,7 +64,15 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
-  const isSuperAdmin = userData?.role === 'Super_Admin';
+  // firestore.rules only allows the owning user to keep editing while
+  // status is 'Draft' — once it's 'Pending_Approval' the only legal write
+  // is an admin's approval. The controls below used to only lock at
+  // 'Published', so a user could keep typing and hit Save Draft on a
+  // submitted entry and get a silent rejection (looked like nothing
+  // happened). Locked at both statuses now, matching the RFI-reference
+  // select and the Submit button, which already had this right.
+  const isEntryLocked = activeEntry?.status === 'Published' || activeEntry?.status === 'Pending_Approval';
+  const canApprove = userData?.role === 'Super_Admin' || userData?.role === 'Org_Admin';
 
   useEffect(() => {
     if (projectTarget) {
@@ -307,7 +315,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
   };
 
   const handleApprove = async (entry: any) => {
-    if (!isSuperAdmin) return;
+    if (!canApprove) return;
     try {
       const docRef = doc(db, `projects/${selectedProject}/site_diaries`, entry.id);
       await updateDoc(docRef, {
@@ -449,7 +457,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
                   className="w-full bg-transparent outline-none text-xs font-bold text-zinc-600 appearance-none disabled:opacity-75"
                   value={selectedRfiId}
                   onChange={(e) => setSelectedRfiId(e.target.value)}
-                  disabled={activeEntry?.status === 'Published' || activeEntry?.status === 'Pending_Approval'}
+                  disabled={isEntryLocked}
                 >
                   <option value="">Reference an active RFI (Optional)...</option>
                   {rfis.map(rfi => (
@@ -460,7 +468,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
             </div>
 
             <textarea 
-              disabled={activeEntry?.status === 'Published'}
+              disabled={isEntryLocked}
               placeholder="Record daily progress, delays, instructions, and site conditions..."
               className="w-full h-64 p-6 bg-zinc-50 border border-zinc-100 rounded-3xl outline-none focus:bg-white focus:border-architect-coal transition-all resize-none text-sm font-medium leading-relaxed disabled:opacity-75"
               value={note}
@@ -493,7 +501,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
             <div className="flex flex-wrap gap-3 mt-8">
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                disabled={activeEntry?.status === 'Published'}
+                disabled={isEntryLocked}
                 className="p-3 bg-zinc-50 text-zinc-500 rounded-xl hover:bg-zinc-100 transition-all border border-zinc-100 disabled:opacity-50"
                 title="Add Photos"
               >
@@ -501,7 +509,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
               </button>
               <button 
                 onClick={() => videoInputRef.current?.click()}
-                disabled={activeEntry?.status === 'Published'}
+                disabled={isEntryLocked}
                 className="p-3 bg-zinc-50 text-zinc-500 rounded-xl hover:bg-zinc-100 transition-all border border-zinc-100 disabled:opacity-50"
                 title="Add Video"
               >
@@ -512,7 +520,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
 
               <button 
                 onClick={handleCleanNote}
-                disabled={isCleaning || !note || activeEntry?.status === 'Published'}
+                disabled={isCleaning || !note || isEntryLocked}
                 className="px-6 py-4 bg-zinc-100 text-architect-coal font-black text-[10px] uppercase tracking-widest rounded-2xl shadow hover:shadow-lg transition-all flex items-center justify-center gap-2 border border-zinc-50 disabled:opacity-50"
               >
                 <Sparkles className="w-4 h-4 text-olive-primary" /> Format Text
@@ -522,14 +530,14 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
             <div className="grid grid-cols-2 gap-4 mt-6">
                <button 
                 onClick={handleSaveDraft}
-                disabled={isSubmitting || !selectedProject || !note || activeEntry?.status === 'Published'}
+                disabled={isSubmitting || !selectedProject || !note || isEntryLocked}
                 className="py-4 bg-zinc-800 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-zinc-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 Save Draft
               </button>
               <button 
                 onClick={handleSubmitForApproval}
-                disabled={isSubmitting || !selectedProject || !note || activeEntry?.status === 'Published' || activeEntry?.status === 'Pending_Approval'}
+                disabled={isSubmitting || !selectedProject || !note || isEntryLocked}
                 className="py-4 bg-architect-coal text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-architect-coal/20 hover:bg-opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 Submit for Approval
@@ -587,7 +595,7 @@ export default function SiteDiary({ user, userData, projectTarget }: { user: any
                      </div>
                   </div>
                   
-                  {isSuperAdmin && entry.status === 'Pending_Approval' && (
+                  {canApprove && entry.status === 'Pending_Approval' && (
                     <div className="flex gap-2">
                        <button 
                         onClick={() => handleApprove(entry)}

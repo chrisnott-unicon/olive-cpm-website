@@ -9,7 +9,7 @@ import {
   FileCheck,
   TrendingDown
 } from 'lucide-react';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { 
   collection, 
   query, 
@@ -54,6 +54,8 @@ export default function BaselineSummary({ projectId, user }: BaselineSummaryProp
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setPrograms(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BaselineProgram)));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectId}/baseline_programs`);
     });
     return unsubscribe;
   }, [projectId]);

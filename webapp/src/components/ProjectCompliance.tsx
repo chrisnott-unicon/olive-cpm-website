@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, query, onSnapshot, orderBy, doc, addDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { CheckCircle2, Circle, AlertTriangle, Plus, Trash2, Bot, ShieldCheck, MapPin, ShieldAlert } from 'lucide-react';
 import { generateComplianceChecklist } from '../services/aiService';
@@ -20,6 +20,8 @@ export default function ProjectComplianceHub({ projectTarget, user, userData }: 
     const q = query(collection(db, 'projects', projectTarget.id, 'compliance'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, (snapshot) => {
       setItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectTarget.id}/compliance`);
     });
     return unsub;
   }, [projectTarget]);

@@ -22,7 +22,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import StakeholderMindMap from './StakeholderMindMap';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { 
   collection, 
   query, 
@@ -98,6 +98,9 @@ export default function StakeholderRegistry({ projectTarget, user, userData }: S
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Stakeholder));
       setStakeholders(list);
+      setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectTarget.id}/stakeholders`);
       setLoading(false);
     });
 

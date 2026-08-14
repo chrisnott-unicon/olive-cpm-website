@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, query, limit, onSnapshot, orderBy, where } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { 
   TrendingUp, 
   Users, 
@@ -84,6 +84,8 @@ const FieldOpsSummaryWidget = ({ projectId }: { projectId: string }) => {
       } else {
         setSummary("No recent field operations recorded.");
       }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectId}/site_diaries`);
     });
     return unsub;
   }, [projectId]);
@@ -178,6 +180,8 @@ export default function Dashboard({ user, userData, selectedProjectId, onSelectP
         overallProgress: progress,
         pendingVariations: pendingVars
       });
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'projects');
     });
     return unsubscribe;
   }, [userData]);

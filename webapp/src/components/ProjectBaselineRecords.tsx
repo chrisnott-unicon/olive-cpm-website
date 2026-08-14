@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { FileText, UploadCloud, File, Download, Search, AlertCircle, Link, FileArchive, Trash2, Calendar, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import BaselineSetupStepper from './BaselineSetupStepper';
@@ -56,6 +56,9 @@ export default function ProjectBaselineRecords({ projectTarget, user, userData }
         ...doc.data()
       })) as BaselineRecord[];
       setRecords(recs.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis()));
+      setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectTarget.id}/baseline_records`);
       setLoading(false);
     });
 

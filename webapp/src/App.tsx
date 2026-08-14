@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { auth, db } from './lib/firebase';
+import { auth, db, handleFirestoreError, OperationType } from './lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { 
@@ -42,12 +42,24 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const inviteId = params.get('inviteId');
     const projectId = params.get('projectId');
-    
+
     if (inviteId && projectId) {
       setInvitationData({ inviteId, projectId });
     }
 
+    // Tracks the sidebar projects listener across auth state changes. Without
+    // this, signing out and into a different account in the same tab left the
+    // previous account's listener running — any subsequent write matching its
+    // (different org's) query would silently repopulate the sidebar with the
+    // wrong tenant's projects while the new account was signed in.
+    let unsubscribeProjects: (() => void) | null = null;
+
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      if (unsubscribeProjects) {
+        unsubscribeProjects();
+        unsubscribeProjects = null;
+      }
+
       if (authUser) {
         setUser(authUser);
         const userDoc = await getDoc(doc(db, 'users', authUser.uid));
@@ -70,17 +82,26 @@ export default function App() {
           setUserData(currentUserData);
         }
 
-        // Fetch Projects for sidebar
-        let constraints: any[] = [orderBy('createdAt', 'desc')];
-        if (currentUserData.role !== 'Super_Admin' && currentUserData.orgId) {
-           constraints.push(where('orgId', '==', currentUserData.orgId));
+        // Fetch Projects for sidebar. A non-admin with no orgId yet (brand
+        // new account, hasn't joined/created a company) has nothing to
+        // legitimately list — querying unfiltered would just be rejected by
+        // firestore.rules anyway, so skip it rather than issue a doomed query.
+        if (currentUserData.role !== 'Super_Admin' && !currentUserData.orgId) {
+          setProjects([]);
+        } else {
+          let constraints: any[] = [orderBy('createdAt', 'desc')];
+          if (currentUserData.role !== 'Super_Admin') {
+            constraints.push(where('orgId', '==', currentUserData.orgId));
+          }
+          const q = query(collection(db, 'projects'), ...constraints);
+
+          unsubscribeProjects = onSnapshot(q, (snapshot) => {
+            let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setProjects(data);
+          }, (error) => {
+            handleFirestoreError(error, OperationType.LIST, 'projects');
+          });
         }
-        const q = query(collection(db, 'projects'), ...constraints);
-        
-        onSnapshot(q, (snapshot) => {
-          let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setProjects(data);
-        });
 
       } else {
         setUser(null);
@@ -89,7 +110,10 @@ export default function App() {
       }
       setLoading(false);
     });
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      if (unsubscribeProjects) unsubscribeProjects();
+    };
   }, []);
 
   const logout = () => auth.signOut();

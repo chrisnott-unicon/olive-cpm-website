@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, deleteDoc, getDocs } from 'firebase/firestore';
 import { Box, Users, Truck, Factory, Search, QrCode, HardHat, Camera, UploadCloud, AlertTriangle, CheckCircle, TrendingUp, Cpu, RefreshCw, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -24,6 +24,9 @@ export default function ProjectResourceHub({ projectTarget, user, userData }: Pr
     const q = query(collection(db, 'projects', projectTarget.id, 'resources'));
     const unsub = onSnapshot(q, (snap) => {
       setResources(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `projects/${projectTarget.id}/resources`);
       setLoading(false);
     });
     return () => unsub();
